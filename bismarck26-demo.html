@@ -1,0 +1,2635 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BISMARCKSTRASSE 26 — Eine Vision in München-Schwabing</title>
+<meta name="description" content="Penthouse-Maisonette mit privatem Skydeck. 325 m² über den Dächern Schwabings. Ein Projekt der Metropolian Liegenschaften GmbH." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Italiana&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@200;300;400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+/* ========== RESET & ROOT ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F6F2EA;
+  --bg-warm: #EFE8DA;
+  --bg-stone: #E5DCC8;
+  --ink: #1A1813;
+  --ink-soft: #4A4540;
+  --ink-mute: #807870;
+  --line: #C9BFA8;
+  --line-soft: #D9D0BC;
+  --accent: #8A6F3D;
+  --accent-warm: #B8956A;
+  --glass: rgba(246, 242, 234, 0.78);
+  --shadow-soft: 0 1px 60px rgba(26, 24, 19, 0.06);
+
+  --serif-display: 'Italiana', serif;
+  --serif-body: 'Cormorant Garamond', serif;
+  --sans: 'Manrope', system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --gutter: clamp(1.5rem, 4vw, 4rem);
+}
+
+html, body { width: 100%; }
+html { scroll-behavior: auto; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  overflow-x: hidden;
+  cursor: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: inherit; text-decoration: none; cursor: none; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: none; }
+input, textarea, select { font: inherit; color: inherit; cursor: none; }
+img, video, canvas { display: block; max-width: 100%; }
+
+::selection { background: var(--ink); color: var(--bg); }
+
+/* ========== GRAIN OVERLAY ========== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0 0.07 0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+}
+
+/* ========== CUSTOM CURSOR ========== */
+.cursor-wrap {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  top: 0; left: 0;
+  mix-blend-mode: difference;
+}
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--bg);
+  pointer-events: none;
+  z-index: 10001;
+  transform: translate(-50%, -50%);
+  transition: transform 0.18s var(--ease-out-expo), opacity 0.3s ease;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 36px; height: 36px;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s var(--ease-out-expo), height 0.4s var(--ease-out-expo), border-color 0.3s ease;
+}
+.cursor-ring.hover {
+  width: 64px; height: 64px;
+  border-color: var(--accent);
+}
+
+/* ========== LOADER ========== */
+.loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--gutter);
+  pointer-events: all;
+}
+.loader-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.loader-mark {
+  font-family: var(--serif-display);
+  font-size: clamp(3.5rem, 12vw, 11rem);
+  letter-spacing: -0.01em;
+  line-height: 0.92;
+  color: var(--ink);
+  text-align: left;
+}
+.loader-mark .word {
+  display: block;
+  overflow: hidden;
+}
+.loader-mark .word span {
+  display: inline-block;
+  /* hide state applied via JS only after GSAP confirmed loaded */
+}
+.loader-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.loader-progress {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--serif-display);
+  font-size: 1rem;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+/* ========== NAV ========== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 800;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem var(--gutter);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink);
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+.nav > * { pointer-events: auto; }
+.nav .nav-brand {
+  font-family: var(--serif-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.18em;
+  color: var(--bg);
+}
+.nav .nav-meta {
+  display: flex;
+  gap: 2.5rem;
+  color: var(--bg);
+}
+.nav .nav-meta a { position: relative; }
+.nav .nav-meta a::after {
+  content: ''; position: absolute; left: 0; bottom: -4px; width: 0; height: 1px; background: var(--bg);
+  transition: width 0.5s var(--ease-out-expo);
+}
+.nav .nav-meta a:hover::after { width: 100%; }
+
+@media (max-width: 720px) {
+  .nav .nav-meta { display: none; }
+}
+
+/* ========== SECTION COMMONS ========== */
+section {
+  position: relative;
+  padding: clamp(6rem, 12vh, 12rem) var(--gutter);
+}
+.eyebrow {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.eyebrow::before {
+  content: ''; display: inline-block; width: 22px; height: 1px; background: var(--ink-mute);
+}
+
+.split-line { overflow: hidden; }
+.split-word { display: inline-block; overflow: hidden; vertical-align: top; }
+.split-word > span { display: inline-block; will-change: transform; }
+/* hide state applied via JS only after GSAP confirmed loaded */
+
+/* ========== HERO ========== */
+.hero {
+  min-height: 100vh;
+  padding-top: clamp(8rem, 16vh, 14rem);
+  padding-bottom: clamp(4rem, 8vh, 6rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+.hero-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: end;
+}
+.hero-meta {
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-weight: 400;
+}
+.hero-meta-right {
+  text-align: right;
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  max-width: 22ch;
+  justify-self: end;
+}
+.hero-title {
+  font-family: var(--serif-display);
+  font-size: clamp(3.5rem, 14vw, 14rem);
+  line-height: 0.88;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: clamp(2rem, 8vh, 6rem) 0;
+  text-wrap: balance;
+}
+.hero-title .num {
+  font-family: var(--serif-display);
+  font-style: normal;
+  display: inline-block;
+}
+.hero-title .num sup {
+  font-size: 0.45em;
+  vertical-align: super;
+  font-family: var(--sans);
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  margin-left: 0.05em;
+}
+.hero-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: end;
+}
+.hero-tagline {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.1rem, 1.6vw, 1.5rem);
+  line-height: 1.45;
+  color: var(--ink-soft);
+  max-width: 38ch;
+}
+.hero-scroll {
+  text-align: right;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+.hero-scroll-line {
+  width: 60px; height: 1px; background: var(--ink-mute);
+  position: relative; overflow: hidden;
+}
+.hero-scroll-line::after {
+  content: ''; position: absolute; left: -100%; top: 0; width: 100%; height: 100%; background: var(--ink);
+  animation: scroll-pulse 2.4s var(--ease-in-out-quart) infinite;
+}
+@keyframes scroll-pulse { 0% { left: -100%; } 100% { left: 100%; } }
+
+@media (max-width: 720px) {
+  .hero-top, .hero-bottom { grid-template-columns: 1fr; gap: 1.5rem; }
+  .hero-meta-right, .hero-scroll { text-align: left; justify-self: start; }
+}
+
+/* ========== MANIFEST ========== */
+.manifest {
+  padding-top: clamp(8rem, 16vh, 16rem);
+  padding-bottom: clamp(8rem, 16vh, 16rem);
+  background: var(--bg);
+}
+.manifest-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.manifest-title {
+  font-family: var(--serif-display);
+  font-size: clamp(3rem, 9vw, 9rem);
+  line-height: 0.95;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.manifest-title em {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ink-soft);
+}
+.manifest-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  margin-top: clamp(4rem, 10vh, 8rem);
+  font-family: var(--serif-body);
+  font-size: 1.35rem;
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.manifest-body p { max-width: 44ch; }
+@media (max-width: 720px) {
+  .manifest-body { grid-template-columns: 1fr; gap: 1.5rem; font-size: 1.15rem; }
+}
+
+/* ========== LOCATION ========== */
+.location {
+  padding-bottom: clamp(8rem, 16vh, 14rem);
+}
+.location-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  gap: 4rem;
+  margin-bottom: clamp(4rem, 8vh, 6rem);
+}
+.location-title {
+  font-family: var(--serif-display);
+  font-size: clamp(2.5rem, 6.5vw, 6rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.location-title em {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+}
+.location-intro {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 36ch;
+  justify-self: end;
+}
+.location-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2rem;
+}
+.poi {
+  border-top: 1px solid var(--line);
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+  transition: padding 0.6s var(--ease-out-expo);
+}
+.poi:hover { padding-left: 1rem; }
+.poi-num {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+  font-weight: 400;
+}
+.poi-name {
+  font-family: var(--serif-display);
+  font-size: clamp(1.6rem, 2.4vw, 2.4rem);
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.poi-meta {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+.poi-1 { grid-column: span 5; }
+.poi-2 { grid-column: span 4; grid-column-start: 8; }
+.poi-3 { grid-column: span 6; grid-column-start: 1; }
+.poi-4 { grid-column: span 4; grid-column-start: 9; }
+.poi-5 { grid-column: span 4; grid-column-start: 2; }
+.poi-6 { grid-column: span 5; grid-column-start: 8; }
+@media (max-width: 720px) {
+  .location-head { grid-template-columns: 1fr; }
+  .location-intro { justify-self: start; }
+  .location-grid > * { grid-column: 1 / -1 !important; }
+}
+
+/* ========== ARCHITECTURE 3D ========== */
+.architecture {
+  background: var(--bg-warm);
+  padding-top: clamp(8rem, 14vh, 14rem);
+  padding-bottom: clamp(8rem, 14vh, 14rem);
+  overflow: hidden;
+}
+.arch-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  gap: 4rem;
+  margin-bottom: clamp(3rem, 6vh, 5rem);
+}
+.arch-title {
+  font-family: var(--serif-display);
+  font-size: clamp(2.5rem, 7vw, 7rem);
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+}
+.arch-title em {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+}
+.arch-intro {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 38ch;
+  justify-self: end;
+}
+.arch-stage {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 4rem;
+  align-items: stretch;
+  min-height: 70vh;
+}
+.arch-canvas-wrap {
+  position: relative;
+  background: linear-gradient(180deg, var(--bg-warm) 0%, var(--bg-stone) 100%);
+  border-radius: 2px;
+  min-height: 65vh;
+  overflow: hidden;
+}
+.arch-canvas-wrap canvas {
+  width: 100%; height: 100%; display: block;
+  touch-action: none;  /* let our pointer-drag handle gestures, prevent page-scroll fight */
+}
+.arch-canvas-hint {
+  position: absolute;
+  bottom: 1.5rem; left: 1.5rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  display: flex; align-items: center; gap: 0.75rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease 0.4s;
+}
+.arch-canvas-hint.visible { opacity: 1; }
+.arch-canvas-hint::before {
+  content: ''; width: 18px; height: 18px;
+  border: 1px solid var(--ink-mute);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--ink-mute) 22%, transparent 23%);
+}
+.arch-stats {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0;
+}
+.arch-stat {
+  border-top: 1px solid var(--line);
+  padding: 1.5rem 0;
+}
+.arch-stat:last-child { border-bottom: 1px solid var(--line); }
+.arch-stat-num {
+  font-family: var(--serif-display);
+  font-size: clamp(2rem, 3.5vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.arch-stat-num sup {
+  font-family: var(--sans);
+  font-size: 0.4em;
+  font-weight: 300;
+  vertical-align: super;
+  letter-spacing: 0.05em;
+  margin-left: 0.1em;
+}
+.arch-stat-label {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-top: 0.5rem;
+}
+@media (max-width: 900px) {
+  .arch-head { grid-template-columns: 1fr; }
+  .arch-intro { justify-self: start; }
+  .arch-stage { grid-template-columns: 1fr; }
+}
+
+/* ========== FLOOR EXPLORER ========== */
+.floor {
+  padding-top: clamp(8rem, 14vh, 14rem);
+  padding-bottom: clamp(8rem, 14vh, 14rem);
+  position: relative;
+  overflow: hidden;
+}
+.floor-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  gap: 4rem;
+  margin-bottom: clamp(3rem, 6vh, 5rem);
+}
+.floor-title {
+  font-family: var(--serif-display);
+  font-size: clamp(2.5rem, 7vw, 7rem);
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+}
+.floor-title em {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+}
+.floor-intro {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 38ch;
+  justify-self: end;
+}
+.floor-stage {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 3rem;
+  min-height: 70vh;
+}
+.sun-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0;
+}
+.sun-controls-title {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 1.5rem;
+}
+.sun-btn {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1.25rem;
+  text-align: left;
+  border-top: 1px solid var(--line);
+  padding: 1.5rem 0;
+  width: 100%;
+  position: relative;
+  transition: padding-left 0.6s var(--ease-out-expo);
+  color: var(--ink-mute);
+}
+.sun-btn:last-of-type { border-bottom: 1px solid var(--line); }
+.sun-btn:hover { padding-left: 0.75rem; color: var(--ink); }
+.sun-btn.active { color: var(--ink); padding-left: 0.75rem; }
+.sun-btn.active::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--accent);
+}
+.sun-btn-time {
+  font-family: var(--serif-display);
+  font-size: 1.6rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.sun-btn-label {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+}
+.sun-btn.active .sun-btn-label { color: var(--ink); }
+.sun-btn-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg-stone);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: background 0.6s var(--ease-out-expo);
+}
+.sun-btn.active .sun-btn-icon { background: var(--accent-warm); }
+.sun-btn-icon::after {
+  content: ''; position: absolute; inset: 4px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 240, 220, 0.9), rgba(184, 149, 106, 0.4));
+  transition: opacity 0.6s ease;
+}
+
+.floor-canvas-wrap {
+  position: relative;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-warm) 100%);
+  border-radius: 2px;
+  overflow: hidden;
+  min-height: 65vh;
+}
+.floor-canvas-wrap canvas {
+  width: 100%; height: 100%; display: block;
+  touch-action: pan-y;  /* allow vertical page scroll, but capture taps on hotspots */
+}
+.room-info {
+  position: absolute;
+  bottom: 1.5rem; left: 1.5rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out-expo);
+  max-width: 320px;
+}
+.room-info.visible { opacity: 1; }
+.room-info-name {
+  font-family: var(--serif-display);
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--ink);
+}
+.room-info-meta {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  margin-top: 0.4rem;
+}
+.floor-hint {
+  position: absolute;
+  top: 1.5rem; right: 1.5rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .floor-head { grid-template-columns: 1fr; }
+  .floor-intro { justify-self: start; }
+  .floor-stage { grid-template-columns: 1fr; }
+}
+
+/* ========== LIFESTYLE ========== */
+.lifestyle {
+  background: var(--bg);
+  padding-top: clamp(6rem, 12vh, 12rem);
+  padding-bottom: clamp(6rem, 12vh, 12rem);
+}
+.lifestyle-head {
+  margin-bottom: clamp(4rem, 8vh, 6rem);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: end;
+}
+.lifestyle-title {
+  font-family: var(--serif-display);
+  font-size: clamp(2.5rem, 6.5vw, 6rem);
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+}
+.lifestyle-title em {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+}
+.lifestyle-intro {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 36ch;
+  justify-self: end;
+}
+.life-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2rem;
+  grid-auto-flow: dense;
+}
+.life-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--bg-stone);
+}
+.life-card .life-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.6s var(--ease-out-expo);
+}
+.life-card:hover .life-img { transform: scale(1.05); }
+.life-card .life-caption {
+  position: absolute;
+  left: 1.5rem; bottom: 1.5rem; right: 1.5rem;
+  color: var(--bg);
+  z-index: 2;
+}
+.life-card .life-caption-time {
+  font-family: var(--serif-display);
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.life-card .life-caption-text {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1rem;
+  margin-top: 0.4rem;
+  max-width: 28ch;
+}
+.life-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(26, 24, 19, 0.65) 100%);
+  z-index: 1;
+}
+.life-1 { grid-column: span 7; aspect-ratio: 4/3; }
+.life-2 { grid-column: span 5; aspect-ratio: 3/4; }
+.life-3 { grid-column: span 5; aspect-ratio: 1/1.1; }
+.life-4 { grid-column: span 7; aspect-ratio: 4/3; }
+.life-5 { grid-column: span 12; aspect-ratio: 21/9; }
+@media (max-width: 720px) {
+  .lifestyle-head { grid-template-columns: 1fr; }
+  .lifestyle-intro { justify-self: start; }
+  .life-grid > * { grid-column: 1 / -1 !important; aspect-ratio: 4/3; }
+}
+
+/* ========== INVESTMENT ========== */
+.invest {
+  background: var(--ink);
+  color: var(--bg);
+  padding-top: clamp(6rem, 14vh, 14rem);
+  padding-bottom: clamp(6rem, 14vh, 14rem);
+  position: relative;
+}
+.invest .eyebrow {
+  color: rgba(246, 242, 234, 0.55);
+}
+.invest .eyebrow::before { background: rgba(246, 242, 234, 0.55); }
+
+.invest-title {
+  font-family: var(--serif-display);
+  font-size: clamp(2.5rem, 7vw, 7rem);
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+  color: var(--bg);
+  text-wrap: balance;
+  margin-top: 1.5rem;
+  max-width: 18ch;
+}
+.invest-title em {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  color: rgba(246, 242, 234, 0.6);
+}
+.invest-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: clamp(4rem, 10vh, 8rem);
+}
+.invest-stat {
+  border-top: 1px solid rgba(246, 242, 234, 0.18);
+  padding-top: 1.5rem;
+}
+.invest-stat-num {
+  font-family: var(--serif-display);
+  font-size: clamp(3rem, 7vw, 7rem);
+  line-height: 0.92;
+  letter-spacing: -0.015em;
+  color: var(--bg);
+  font-variant-numeric: tabular-nums;
+}
+.invest-stat-num sup {
+  font-family: var(--sans);
+  font-size: 0.32em;
+  font-weight: 300;
+  vertical-align: super;
+  letter-spacing: 0.05em;
+  margin-left: 0.1em;
+  color: rgba(246, 242, 234, 0.6);
+}
+.invest-stat-label {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(246, 242, 234, 0.55);
+  margin-top: 1rem;
+}
+.invest-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-top: clamp(4rem, 8vh, 6rem);
+  gap: 2rem;
+}
+.invest-note {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.2rem;
+  color: rgba(246, 242, 234, 0.7);
+  max-width: 36ch;
+}
+.invest-link {
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--bg);
+  border-bottom: 1px solid rgba(246, 242, 234, 0.4);
+  padding-bottom: 0.4rem;
+  transition: border-color 0.4s var(--ease-out-expo);
+}
+.invest-link:hover { border-color: var(--bg); }
+@media (max-width: 720px) {
+  .invest-grid { grid-template-columns: repeat(2, 1fr); }
+  .invest-foot { flex-direction: column; align-items: flex-start; }
+}
+
+/* ========== BOOKING ========== */
+.booking {
+  padding-top: clamp(8rem, 14vh, 14rem);
+  padding-bottom: clamp(6rem, 12vh, 10rem);
+  background: var(--bg);
+}
+.booking-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+.booking-col-left { padding-right: 2rem; }
+.booking-title {
+  font-family: var(--serif-display);
+  font-size: clamp(2.5rem, 6vw, 6rem);
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-top: 1.5rem;
+}
+.booking-title em {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+}
+.booking-text {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 38ch;
+  margin-top: 2rem;
+}
+.booking-asset {
+  margin-top: 3rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  border-top: 1px solid var(--line);
+  padding-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.booking-asset strong {
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: 0.18em;
+}
+
+.form-group { margin-bottom: 2rem; }
+.form-label {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 0.75rem;
+  font-weight: 400;
+}
+.form-input, .form-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding: 0.5rem 0;
+  font-family: var(--serif-body);
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.4s var(--ease-out-expo);
+}
+.form-input::placeholder, .form-textarea::placeholder {
+  color: var(--ink-mute);
+  font-style: italic;
+}
+.form-input:focus, .form-textarea:focus { border-color: var(--ink); }
+.form-textarea { resize: none; min-height: 3.5rem; line-height: 1.4; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.form-segment {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+}
+.form-seg-btn {
+  flex: 1;
+  padding: 1rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  text-align: center;
+  position: relative;
+  transition: color 0.4s var(--ease-out-expo);
+  min-width: 33%;
+}
+.form-seg-btn::after {
+  content: ''; position: absolute; left: 0; bottom: -1px; width: 0; height: 1px;
+  background: var(--ink); transition: width 0.5s var(--ease-out-expo);
+}
+.form-seg-btn:hover { color: var(--ink); }
+.form-seg-btn.active { color: var(--ink); }
+.form-seg-btn.active::after { width: 100%; }
+
+.form-submit {
+  margin-top: 2rem;
+  padding: 1.25rem 2.5rem;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: padding-right 0.5s var(--ease-out-expo);
+}
+.form-submit:hover { padding-right: 3.5rem; }
+.form-submit-arrow {
+  position: absolute; right: 1.5rem; top: 50%;
+  transform: translateY(-50%);
+  width: 16px; height: 1px;
+  background: var(--bg);
+  transition: width 0.5s var(--ease-out-expo);
+}
+.form-submit:hover .form-submit-arrow { width: 24px; }
+.form-submit-arrow::after {
+  content: ''; position: absolute; right: 0; top: -3px; width: 7px; height: 7px;
+  border-right: 1px solid var(--bg); border-top: 1px solid var(--bg);
+  transform: rotate(45deg);
+}
+
+@media (max-width: 900px) {
+  .booking-inner { grid-template-columns: 1fr; gap: 3rem; }
+  .booking-col-left { padding-right: 0; }
+  .form-row { grid-template-columns: 1fr; }
+}
+
+/* ========== FOOTER ========== */
+.footer {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 3rem var(--gutter) 2rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.footer-mark {
+  font-family: var(--serif-display);
+  font-size: 1.8rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  line-height: 1;
+}
+.footer-meta { color: rgba(246, 242, 234, 0.6); line-height: 1.8; }
+.footer-meta strong { color: var(--bg); font-weight: 400; }
+.footer-end {
+  font-size: 0.65rem;
+  color: rgba(246, 242, 234, 0.4);
+  text-align: right;
+}
+
+/* ========== UTILITY ========== */
+.fade-in { transition: opacity 1.2s var(--ease-out-expo); }
+.fade-in.visible { opacity: 1; }
+/* opacity:0 hide state applied via JS only after GSAP confirmed loaded */
+
+.no-cursor { cursor: auto !important; }
+@media (hover: none) {
+  body, a, button, input, textarea { cursor: auto; }
+  .cursor-dot, .cursor-ring { display: none; }
+}
+
+/* ========== MOBILE PASS — touch / small viewport polish ========== */
+@media (max-width: 720px) {
+  :root { --gutter: clamp(1.25rem, 5vw, 2rem); }
+
+  /* Hero — let the title breathe at small widths */
+  .hero { min-height: 92vh; padding-top: clamp(7rem, 14vh, 10rem); }
+  .hero-title { font-size: clamp(3rem, 13vw, 5rem); margin: 2.5rem 0; }
+
+  /* 3D sections — keep proportional, never tower over the screen */
+  .arch-canvas-wrap { min-height: 56vh; }
+  .floor-canvas-wrap { min-height: 60vh; }
+  .arch-stage, .floor-stage { gap: 2rem; }
+  .arch-stats { gap: 0; }
+  .arch-stat { padding: 1rem 0; }
+  .arch-stat-num { font-size: clamp(1.6rem, 7vw, 2.4rem); }
+
+  /* Sun-controls become a horizontal scroll strip */
+  .sun-controls {
+    flex-direction: row;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    scrollbar-width: none;
+  }
+  .sun-controls::-webkit-scrollbar { display: none; }
+  .sun-controls-title { display: none; }
+  .sun-btn { flex: 0 0 auto; min-width: 9rem; }
+
+  /* Lifestyle cards — single column, no awkward overlap */
+  .life-grid > * { aspect-ratio: 4/3; }
+
+  /* Booking form — stack everything */
+  .form-grid { grid-template-columns: 1fr !important; gap: 1.5rem; }
+  .form-seg-row { flex-wrap: wrap; }
+
+  /* Footer — stack columns */
+  .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .footer-end { text-align: left; }
+}
+
+/* Honor user's reduce-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Cursor -->
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+  <div class="loader-top">
+    <span>München · Schwabing</span>
+    <span>Eine Vision</span>
+  </div>
+  <div class="loader-mark" id="loaderMark">
+    <span class="word"><span>Bismarck</span></span>
+    <span class="word"><span>26.</span></span>
+  </div>
+  <div class="loader-bottom">
+    <span>Metropolian Liegenschaften GmbH</span>
+    <span class="loader-progress" id="loaderProgress">0</span>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav class="nav" id="nav">
+  <div class="nav-brand">Bismarck 26</div>
+  <div class="nav-meta">
+    <a href="#vision">Vision</a>
+    <a href="#standort">Standort</a>
+    <a href="#architektur">Architektur</a>
+    <a href="#grundriss">Grundriss</a>
+    <a href="#kontakt">Kontakt</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-top">
+    <span class="hero-meta">Bismarckstraße 26 · 80803 München</span>
+    <span class="hero-meta-right">Penthouse-Maisonette<br>auf zwei Ebenen<br>mit privatem Skydeck.</span>
+  </div>
+  <h1 class="hero-title" id="heroTitle">
+    <span class="split-line"><span class="split-word"><span>Eine</span></span> <span class="split-word"><span>Vision</span></span></span>
+    <span class="split-line"><span class="split-word"><span>auf</span></span> <span class="split-word"><span class="num">325<sup>m²</sup></span></span><span class="split-word"><span>.</span></span></span>
+  </h1>
+  <div class="hero-bottom">
+    <p class="hero-tagline">Sieben Zimmer. Fünf Schlafzimmer. Ein Skydeck mit Panoramablick — über die Dächer Schwabings, bis zu den Alpen.</p>
+    <div class="hero-scroll">
+      <span>Vision entdecken</span>
+      <span class="hero-scroll-line"></span>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFEST -->
+<section class="manifest" id="vision">
+  <div class="manifest-inner">
+    <span class="eyebrow fade-in">Manifest · 01</span>
+    <h2 class="manifest-title" id="manifestTitle" style="margin-top: 2rem;">
+      <span class="split-line"><span class="split-word"><span>Bevor</span></span> <span class="split-word"><span>der</span></span> <span class="split-word"><span>erste</span></span> <span class="split-word"><span>Stein</span></span> <span class="split-word"><span>fällt,</span></span></span>
+      <span class="split-line"><em><span class="split-word"><span>beginnt</span></span> <span class="split-word"><span>das</span></span> <span class="split-word"><span>Wohngefühl.</span></span></em></span>
+    </h2>
+    <div class="manifest-body">
+      <p class="fade-in">Wir laden Sie ein, an einem Ort einzuziehen, der noch entsteht. An einer Adresse, die Schwabings Vergangenheit kennt — und seine Zukunft mitschreibt.</p>
+      <p class="fade-in">Bismarckstraße 26 ist kein Bauprojekt. Es ist ein Versprechen, das in 325 Quadratmetern Realität wird. Bewohnen Sie eine Idee, bevor sie greifbar wird.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LOCATION -->
+<section class="location" id="standort">
+  <div class="location-head">
+    <h2 class="location-title">
+      <span class="eyebrow fade-in" style="display:block; margin-bottom:1.5rem;">Standort · 02</span>
+      Schwabing. Nicht <em>als Adresse</em> — als Lebensgefühl.
+    </h2>
+    <p class="location-intro">Zwischen Münchner Freiheit und Englischem Garten. Zwischen historischen Salons und gegenwärtiger Kultur. Mittendrin, aber zurückgezogen.</p>
+  </div>
+  <div class="location-grid">
+    <div class="poi poi-1 reveal">
+      <span class="poi-num">→ 01</span>
+      <span class="poi-name">Münchner Freiheit</span>
+      <span class="poi-meta">U3 · U6 · 3 Min. zu Fuß</span>
+    </div>
+    <div class="poi poi-2 reveal">
+      <span class="poi-num">→ 02</span>
+      <span class="poi-name">Englischer Garten</span>
+      <span class="poi-meta">5 Min. zu Fuß · Schwabinger Bach</span>
+    </div>
+    <div class="poi poi-3 reveal">
+      <span class="poi-num">→ 03</span>
+      <span class="poi-name">Tantris</span>
+      <span class="poi-meta">Zwei Sterne · fußläufig</span>
+    </div>
+    <div class="poi poi-4 reveal">
+      <span class="poi-num">→ 04</span>
+      <span class="poi-name">Theatiner</span>
+      <span class="poi-meta">Konzerte · 8 Min.</span>
+    </div>
+    <div class="poi poi-5 reveal">
+      <span class="poi-num">→ 05</span>
+      <span class="poi-name">Schwabinger Bach</span>
+      <span class="poi-meta">Idylle · um die Ecke</span>
+    </div>
+    <div class="poi poi-6 reveal">
+      <span class="poi-num">→ 06</span>
+      <span class="poi-name">Flughafen München</span>
+      <span class="poi-meta">20 Min. via Mittlerer Ring</span>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE 3D -->
+<section class="architecture" id="architektur">
+  <div class="arch-head">
+    <h2 class="arch-title">
+      <span class="eyebrow fade-in" style="display:block; margin-bottom:1.5rem;">Architektur · 03</span>
+      Eine Architektur. <em>Zwei Welten.</em>
+    </h2>
+    <p class="arch-intro">Klassische Schwabinger Stadtvilla, neu gedacht. Bewegen Sie das Modell — sehen Sie das Gebäude aus jeder Perspektive.</p>
+  </div>
+  <div class="arch-stage">
+    <div class="arch-canvas-wrap">
+      <canvas id="archCanvas"></canvas>
+      <spline-viewer id="archSpline" loading-anim-type="none" style="display:none; width:100%; height:100%; position:absolute; inset:0;"></spline-viewer>
+      <div class="arch-canvas-hint" id="archHint">Klicken & Ziehen</div>
+    </div>
+    <div class="arch-stats">
+      <div class="arch-stat">
+        <div class="arch-stat-num" data-count="5">0</div>
+        <div class="arch-stat-label">Stockwerke</div>
+      </div>
+      <div class="arch-stat">
+        <div class="arch-stat-num" data-count="7">0</div>
+        <div class="arch-stat-label">Zimmer</div>
+      </div>
+      <div class="arch-stat">
+        <div class="arch-stat-num"><span data-count="325">0</span><sup>m²</sup></div>
+        <div class="arch-stat-label">Wohnfläche</div>
+      </div>
+      <div class="arch-stat">
+        <div class="arch-stat-num">Skydeck</div>
+        <div class="arch-stat-label">Privater Rückzug</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOOR EXPLORER -->
+<section class="floor" id="grundriss">
+  <div class="floor-head">
+    <h2 class="floor-title">
+      <span class="eyebrow fade-in" style="display:block; margin-bottom:1.5rem;">Grundriss · 04</span>
+      Ihr Penthouse. <em>In jedem Licht.</em>
+    </h2>
+    <p class="floor-intro">Erleben Sie Ihre zukünftigen Räume zu jeder Tageszeit. Wechseln Sie das Licht — die Wohnung antwortet.</p>
+  </div>
+  <div class="floor-stage">
+    <div class="sun-controls">
+      <span class="sun-controls-title">Tageszeit</span>
+      <button class="sun-btn" data-time="morning" data-hour="07">
+        <span class="sun-btn-time">07:00</span>
+        <span class="sun-btn-label">Erstes Licht</span>
+        <span class="sun-btn-icon"></span>
+      </button>
+      <button class="sun-btn active" data-time="noon" data-hour="13">
+        <span class="sun-btn-time">13:00</span>
+        <span class="sun-btn-label">Mittagshöhe</span>
+        <span class="sun-btn-icon"></span>
+      </button>
+      <button class="sun-btn" data-time="evening" data-hour="19">
+        <span class="sun-btn-time">19:00</span>
+        <span class="sun-btn-label">Goldene Stunde</span>
+        <span class="sun-btn-icon"></span>
+      </button>
+      <button class="sun-btn" data-time="night" data-hour="23">
+        <span class="sun-btn-time">23:00</span>
+        <span class="sun-btn-label">Stadtlichter</span>
+        <span class="sun-btn-icon"></span>
+      </button>
+    </div>
+    <div class="floor-canvas-wrap">
+      <canvas id="floorCanvas"></canvas>
+      <spline-viewer id="floorSpline" loading-anim-type="none" style="display:none; width:100%; height:100%; position:absolute; inset:0;"></spline-viewer>
+      <div class="floor-hint">Tippen Sie auf einen Raum</div>
+      <div class="room-info" id="roomInfo">
+        <div class="room-info-name" id="roomName">Wohnbereich</div>
+        <div class="room-info-meta" id="roomMeta">— wählen Sie einen Raum —</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIFESTYLE -->
+<section class="lifestyle">
+  <div class="lifestyle-head">
+    <h2 class="lifestyle-title">
+      <span class="eyebrow fade-in" style="display:block; margin-bottom:1.5rem;">Lebensgefühl · 05</span>
+      Ein Tag. <em>Über den Dächern.</em>
+    </h2>
+    <p class="lifestyle-intro">Vom ersten Espresso bis zum letzten Sternenblick. Vier Momente, die Ihnen gehören werden.</p>
+  </div>
+  <div class="life-grid">
+    <div class="life-card life-1 reveal">
+      <img class="life-img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80" alt="" loading="lazy" />
+      <div class="life-caption">
+        <div class="life-caption-time">07:42 Uhr</div>
+        <div class="life-caption-text">Erster Espresso. Skydeck.</div>
+      </div>
+    </div>
+    <div class="life-card life-2 reveal">
+      <img class="life-img" src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80" alt="" loading="lazy" />
+      <div class="life-caption">
+        <div class="life-caption-time">11:15 Uhr</div>
+        <div class="life-caption-text">Lichteinfall durch die Süd-Front.</div>
+      </div>
+    </div>
+    <div class="life-card life-3 reveal">
+      <img class="life-img" src="https://images.unsplash.com/photo-1565183997392-2f6f122e5912?auto=format&fit=crop&w=1200&q=80" alt="" loading="lazy" />
+      <div class="life-caption">
+        <div class="life-caption-time">16:30 Uhr</div>
+        <div class="life-caption-text">Goldene Stunde über dem Esszimmer.</div>
+      </div>
+    </div>
+    <div class="life-card life-4 reveal">
+      <img class="life-img" src="https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&w=1600&q=80" alt="" loading="lazy" />
+      <div class="life-caption">
+        <div class="life-caption-time">20:08 Uhr</div>
+        <div class="life-caption-text">Dinner. Sieben am Tisch. Stadt unter uns.</div>
+      </div>
+    </div>
+    <div class="life-card life-5 reveal">
+      <img class="life-img" src="https://images.unsplash.com/photo-1519999482648-25049ddd37b1?auto=format&fit=crop&w=2400&q=80" alt="" loading="lazy" />
+      <div class="life-caption">
+        <div class="life-caption-time">23:47 Uhr</div>
+        <div class="life-caption-text">Stadt, Stille, Sterne. Ihr Skydeck.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INVESTMENT -->
+<section class="invest">
+  <span class="eyebrow fade-in">Eckdaten · 06</span>
+  <h2 class="invest-title">
+    Eine Investition <em>in das, was bleibt.</em>
+  </h2>
+  <div class="invest-grid">
+    <div class="invest-stat">
+      <div class="invest-stat-num"><span class="counter" data-target="325">0</span><sup>m²</sup></div>
+      <div class="invest-stat-label">Wohnfläche</div>
+    </div>
+    <div class="invest-stat">
+      <div class="invest-stat-num"><span class="counter" data-target="7">0</span></div>
+      <div class="invest-stat-label">Zimmer</div>
+    </div>
+    <div class="invest-stat">
+      <div class="invest-stat-num"><span class="counter" data-target="180">0</span>°</div>
+      <div class="invest-stat-label">Panoramablick</div>
+    </div>
+    <div class="invest-stat">
+      <div class="invest-stat-num"><span class="counter" data-target="5">0</span></div>
+      <div class="invest-stat-label">Schlafzimmer</div>
+    </div>
+  </div>
+  <div class="invest-foot">
+    <p class="invest-note">Erstbezug. Provisionsfrei. Ausstattung nach individueller Abstimmung. Kaufpreis auf vertrauliche Anfrage.</p>
+    <a href="#kontakt" class="invest-link">Privates Exposé anfragen</a>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section class="booking" id="kontakt">
+  <div class="booking-inner">
+    <div class="booking-col-left">
+      <span class="eyebrow">Kontakt · 07</span>
+      <h2 class="booking-title">
+        Eine Besichtigung. <em>Mit Diskretion.</em>
+      </h2>
+      <p class="booking-text">Wir empfangen ausschließlich auf persönlichen Termin. Teilen Sie uns Ihre Vorstellungen mit — wir melden uns binnen 24 Stunden zurück.</p>
+      <div class="booking-asset">
+        <span><strong>Metropolian</strong> · Vermarktung</span>
+        <span>+49 89 455 658-0</span>
+      </div>
+    </div>
+    <form class="booking-form" id="bookingForm">
+      <div class="form-group">
+        <label class="form-label">Sie sind</label>
+        <div class="form-segment" id="segPersona">
+          <button type="button" class="form-seg-btn active" data-val="private">Privatkäufer</button>
+          <button type="button" class="form-seg-btn" data-val="investor">Investor</button>
+          <button type="button" class="form-seg-btn" data-val="family">Family Office</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Vor- &amp; Nachname</label>
+          <input class="form-input" type="text" placeholder="Ihr Name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefon</label>
+          <input class="form-input" type="tel" placeholder="+49 …" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-Mail</label>
+        <input class="form-input" type="email" placeholder="ihre@adresse.de" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Wunschtermin</label>
+        <input class="form-input" type="text" placeholder="z. B. KW 22, vormittags" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Anmerkungen</label>
+        <textarea class="form-textarea" rows="2" placeholder="Persönliche Wünsche, Vorstellungen, Fragen …"></textarea>
+      </div>
+      <button type="submit" class="form-submit">
+        Termin anfragen
+        <span class="form-submit-arrow"></span>
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-mark">Bismarck 26.</div>
+  <div class="footer-meta">
+    <strong>Metropolian Liegenschaften GmbH</strong><br>
+    Geschäftsführer · Stefan Pfender<br>
+    Bismarckstraße 26 · München-Schwabing
+  </div>
+  <div class="footer-end">
+    Demo-Visualisierung · Felix Bartel<br>
+    Awwwards-Pitch · 2026
+  </div>
+</footer>
+
+<!-- LIBRARIES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Lenis (smooth scroll) -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+<!-- Spline Viewer (Web Component) -->
+<script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.48/build/spline-viewer.js"></script>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ============================================================
+   SPLINE SCENE CONFIG — paste your scene URLs here
+   ------------------------------------------------------------
+   How to get a URL:
+     1. Open your scene on spline.design
+     2. Click "Export" → "Code Export" → "Web Component"
+     3. Copy the URL ending in .splinecode
+     4. Paste it below (between the quotes)
+
+   If left empty, the procedural Three.js fallback is used.
+   ============================================================ */
+const SPLINE_SCENES = {
+  building: '',  // e.g. 'https://prod.spline.design/AbC123xyz/scene.splinecode'
+  floor:    ''   // e.g. 'https://prod.spline.design/DeF456xyz/scene.splinecode'
+};
+
+const IS_TOUCH = window.matchMedia('(hover: none)').matches || 'ontouchstart' in window;
+const IS_MOBILE = window.matchMedia('(max-width: 720px)').matches;
+
+/* ========== LENIS SMOOTH SCROLL ========== */
+let lenis = null;
+const _prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (typeof Lenis !== 'undefined' && !_prefersReducedMotion) {
+  lenis = new Lenis({
+    duration: 1.15,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smoothWheel: true,
+    syncTouch: false,        // native scroll on touch devices = better feel + no fight with 3D drag
+    wheelMultiplier: 1.0,
+    touchMultiplier: 1.5
+  });
+  // Sync with GSAP ScrollTrigger so reveals fire correctly
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+  gsap.ticker.lagSmoothing(0);
+}
+
+/* ========== APPLY HIDE STATES (JS-only, so default is visible if GSAP fails) ========== */
+gsap.set('.split-word > span', { yPercent: 110 });
+gsap.set('.fade-in', { opacity: 0 });
+gsap.set('.loader-mark .word > span', { yPercent: 110 });
+
+/* ========== CUSTOM CURSOR ========== */
+(function initCursor() {
+  if (window.matchMedia('(hover: none)').matches) return;
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  let rx = mx, ry = my;
+  document.addEventListener('mousemove', (e) => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
+  });
+  function animateRing() {
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+    ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+  const hoverables = 'a, button, input, textarea, .poi, .life-card, .arch-canvas-wrap, .floor-canvas-wrap, .sun-btn, .form-seg-btn';
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.closest(hoverables)) ring.classList.add('hover');
+  });
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest(hoverables)) ring.classList.remove('hover');
+  });
+})();
+
+/* ========== LOADER & HERO REVEAL ========== */
+let _revealRan = false;
+function revealHero() {
+  if (_revealRan) return;
+  _revealRan = true;
+  const heroTitle = document.getElementById('heroTitle');
+  gsap.fromTo('.hero-meta, .hero-meta-right',
+    { y: 20, opacity: 0 },
+    { y: 0, opacity: 1, duration: 1.2, stagger: 0.08, ease: 'expo.out' }
+  );
+  gsap.fromTo(heroTitle.querySelectorAll('.split-word > span'),
+    { yPercent: 110 },
+    { yPercent: 0, duration: 1.6, ease: 'expo.out', stagger: 0.06, delay: 0.1 }
+  );
+  gsap.fromTo('.hero-tagline, .hero-scroll',
+    { y: 20, opacity: 0 },
+    { y: 0, opacity: 1, duration: 1.2, stagger: 0.1, ease: 'expo.out', delay: 0.7 }
+  );
+  initScrollReveals();
+}
+
+(function initLoader() {
+  const loader = document.getElementById('loader');
+  const progressEl = document.getElementById('loaderProgress');
+  const loaderMark = document.getElementById('loaderMark');
+
+  let kickedOff = false;
+
+  // Progress count
+  let prog = 0;
+  const tick = setInterval(() => {
+    prog += Math.random() * 12 + 4;
+    if (prog >= 100) { prog = 100; clearInterval(tick); kickoff(); }
+    progressEl.textContent = String(Math.floor(prog)).padStart(2, '0');
+  }, 90);
+
+  // Reveal loader text
+  gsap.fromTo(loaderMark.querySelectorAll('.word > span'),
+    { yPercent: 110 },
+    { yPercent: 0, duration: 1.4, ease: 'expo.out', stagger: 0.1, delay: 0.15 }
+  );
+
+  function kickoff() {
+    if (kickedOff) return;
+    kickedOff = true;
+    clearInterval(tick);
+    const tl = gsap.timeline();
+    tl.to(loaderMark.querySelectorAll('.word > span'),
+      { yPercent: -110, duration: 1.0, ease: 'expo.inOut', stagger: 0.06 }, 0.2)
+      .to(loader, { yPercent: -100, duration: 1.2, ease: 'expo.inOut' }, '-=0.4')
+      .add(() => { loader.style.display = 'none'; revealHero(); }, '-=0.2');
+  }
+
+  // Watchdog: force-complete after 5s in case anything hangs (slow CDN, hidden tab, etc.)
+  setTimeout(() => {
+    if (!kickedOff) {
+      progressEl.textContent = '100';
+      kickoff();
+    }
+  }, 5000);
+
+  // Hard fallback: if loader is still on screen after 8s, force-hide and reveal
+  setTimeout(() => {
+    if (loader && loader.style.display !== 'none') {
+      loader.style.display = 'none';
+      revealHero();
+    }
+  }, 8000);
+})();
+
+/* ========== SCROLL REVEALS ========== */
+let _scrollRevealsRan = false;
+function initScrollReveals() {
+  if (_scrollRevealsRan) return;
+  _scrollRevealsRan = true;
+  // Manifest title words
+  const manifestWords = document.querySelectorAll('#manifestTitle .split-word > span');
+  gsap.fromTo(manifestWords,
+    { yPercent: 110 },
+    {
+      yPercent: 0, duration: 1.4, ease: 'expo.out', stagger: 0.05,
+      scrollTrigger: { trigger: '#manifestTitle', start: 'top 75%' }
+    }
+  );
+
+  // Generic fade-ins
+  document.querySelectorAll('.fade-in').forEach((el) => {
+    gsap.to(el, {
+      opacity: 1, duration: 1.4, ease: 'expo.out',
+      scrollTrigger: { trigger: el, start: 'top 88%' }
+    });
+  });
+
+  // POI reveals
+  document.querySelectorAll('.poi.reveal').forEach((el) => {
+    gsap.fromTo(el,
+      { y: 40, opacity: 0 },
+      {
+        y: 0, opacity: 1, duration: 1.2, ease: 'expo.out',
+        scrollTrigger: { trigger: el, start: 'top 90%' }
+      }
+    );
+  });
+
+  // Life cards reveal
+  document.querySelectorAll('.life-card.reveal').forEach((el) => {
+    gsap.fromTo(el,
+      { y: 60, opacity: 0 },
+      {
+        y: 0, opacity: 1, duration: 1.4, ease: 'expo.out',
+        scrollTrigger: { trigger: el, start: 'top 88%' }
+      }
+    );
+    // Parallax inner image
+    gsap.to(el.querySelector('.life-img'), {
+      yPercent: -10,
+      ease: 'none',
+      scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 1 }
+    });
+  });
+
+  // Manifest body fade-in
+  gsap.fromTo('.manifest-body p',
+    { y: 24, opacity: 0 },
+    {
+      y: 0, opacity: 1, duration: 1.2, stagger: 0.12, ease: 'expo.out',
+      scrollTrigger: { trigger: '.manifest-body', start: 'top 80%' }
+    }
+  );
+
+  // Counters
+  document.querySelectorAll('.counter, [data-count]').forEach((el) => {
+    const target = parseInt(el.dataset.target || el.dataset.count, 10);
+    if (isNaN(target)) return;
+    const obj = { v: 0 };
+    gsap.to(obj, {
+      v: target, duration: 2.2, ease: 'expo.out',
+      onUpdate: () => { el.textContent = Math.round(obj.v); },
+      scrollTrigger: { trigger: el, start: 'top 88%' }
+    });
+  });
+
+  // Arch hint fade-in once architecture in view
+  ScrollTrigger.create({
+    trigger: '.architecture',
+    start: 'top 60%',
+    onEnter: () => document.getElementById('archHint').classList.add('visible')
+  });
+
+  // Section header eyebrows + titles
+  gsap.utils.toArray('.location-title, .arch-title, .floor-title, .lifestyle-title, .invest-title, .booking-title').forEach((el) => {
+    gsap.fromTo(el,
+      { y: 30, opacity: 0 },
+      {
+        y: 0, opacity: 1, duration: 1.4, ease: 'expo.out',
+        scrollTrigger: { trigger: el, start: 'top 85%' }
+      }
+    );
+  });
+
+  // Initialize 3D scenes
+  initBuildingScene();
+  initFloorScene();
+  initBookingForm();
+
+  // Subtle hero parallax on scroll
+  gsap.to('.hero-title', {
+    y: -80, ease: 'none',
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 }
+  });
+}
+
+/* ========== THREE.JS SCENE 1 — BUILDING ========== */
+let _buildingSceneInited = false;
+function initBuildingScene() {
+  if (_buildingSceneInited) return;
+  _buildingSceneInited = true;
+
+  // Spline path: if a scene URL is configured, hand off to Spline and skip Three.js entirely
+  if (SPLINE_SCENES.building) {
+    const canvas = document.getElementById('archCanvas');
+    const viewer = document.getElementById('archSpline');
+    if (canvas) canvas.style.display = 'none';
+    if (viewer) {
+      viewer.setAttribute('url', SPLINE_SCENES.building);
+      viewer.style.display = 'block';
+    }
+    return;
+  }
+
+  const canvas = document.getElementById('archCanvas');
+  const wrap = canvas.parentElement;
+  let W = wrap.clientWidth, H = wrap.clientHeight;
+
+  const scene = new THREE.Scene();
+  scene.background = null;
+
+  const camera = new THREE.PerspectiveCamera(35, W / H, 0.1, 100);
+  camera.position.set(8, 5.5, 11);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !IS_MOBILE, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_MOBILE ? 1.5 : 2));
+  renderer.setSize(W, H, false);
+  renderer.shadowMap.enabled = !IS_MOBILE;     // shadows are expensive — drop on mobile
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+
+  // Lighting — Light Modern
+  const hemi = new THREE.HemisphereLight(0xfff5e1, 0xb8a888, 0.55);
+  scene.add(hemi);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+  scene.add(ambient);
+  const sun = new THREE.DirectionalLight(0xfff0d4, 1.0);
+  sun.position.set(8, 12, 6);
+  sun.castShadow = true;
+  sun.shadow.mapSize.width = 1024;
+  sun.shadow.mapSize.height = 1024;
+  sun.shadow.camera.near = 0.5;
+  sun.shadow.camera.far = 40;
+  sun.shadow.camera.left = -10;
+  sun.shadow.camera.right = 10;
+  sun.shadow.camera.top = 10;
+  sun.shadow.camera.bottom = -10;
+  sun.shadow.bias = -0.0005;
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xc9d8e5, 0.4);
+  fill.position.set(-6, 4, -4);
+  scene.add(fill);
+
+  // Materials
+  const facadeMat = new THREE.MeshStandardMaterial({ color: 0xece2d0, roughness: 0.92, metalness: 0.0 });
+  const trimMat = new THREE.MeshStandardMaterial({ color: 0xd9caa8, roughness: 0.85 });
+  const windowMat = new THREE.MeshStandardMaterial({ color: 0x2a2823, roughness: 0.3, metalness: 0.1 });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0xb6c8d4, roughness: 0.15, metalness: 0.6, transparent: true, opacity: 0.8 });
+  const railMat = new THREE.MeshStandardMaterial({ color: 0x36322c, roughness: 0.6, metalness: 0.4 });
+  const roofMat = new THREE.MeshStandardMaterial({ color: 0xb8a890, roughness: 0.95 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0xe5dcc8, roughness: 0.95 });
+
+  // Container group for building
+  const building = new THREE.Group();
+
+  // Ground
+  const groundGeo = new THREE.PlaneGeometry(40, 40);
+  const ground = new THREE.Mesh(groundGeo, floorMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.01;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // ---- Build a 5-story Schwabing-style apartment building ----
+  const FLOORS = 5;
+  const FLOOR_H = 1.0;
+  const W_X = 4.6;       // building width
+  const D_Z = 3.6;       // depth
+  const SETBACK_TOP = 0.6;
+
+  // Base / plinth
+  const plinth = new THREE.Mesh(
+    new THREE.BoxGeometry(W_X + 0.3, 0.35, D_Z + 0.3),
+    trimMat
+  );
+  plinth.position.y = 0.175;
+  plinth.castShadow = true; plinth.receiveShadow = true;
+  building.add(plinth);
+
+  // Build floors (1-4 normal, 5th = recessed penthouse with skydeck)
+  for (let f = 0; f < FLOORS; f++) {
+    const isPenthouse = f === FLOORS - 1;
+    const w = isPenthouse ? W_X - SETBACK_TOP * 2 : W_X;
+    const d = isPenthouse ? D_Z - SETBACK_TOP * 2 : D_Z;
+    const yBase = 0.35 + f * FLOOR_H;
+
+    const facade = new THREE.Mesh(
+      new THREE.BoxGeometry(w, FLOOR_H, d),
+      facadeMat
+    );
+    facade.position.y = yBase + FLOOR_H / 2;
+    facade.castShadow = true;
+    facade.receiveShadow = true;
+    building.add(facade);
+
+    // Floor cornice (between floors)
+    if (!isPenthouse) {
+      const cornice = new THREE.Mesh(
+        new THREE.BoxGeometry(w + 0.18, 0.08, d + 0.18),
+        trimMat
+      );
+      cornice.position.y = yBase + FLOOR_H;
+      cornice.castShadow = true; cornice.receiveShadow = true;
+      building.add(cornice);
+    }
+
+    // Windows on front (z = +d/2 + 0.001) — 3 windows per floor
+    if (!isPenthouse) {
+      const winCount = 3;
+      const winW = 0.55, winH = 0.7;
+      const spacing = w / (winCount + 1);
+      for (let i = 0; i < winCount; i++) {
+        const x = -w / 2 + spacing * (i + 1);
+        // Window recess (frame)
+        const frame = new THREE.Mesh(
+          new THREE.BoxGeometry(winW + 0.08, winH + 0.08, 0.04),
+          trimMat
+        );
+        frame.position.set(x, yBase + FLOOR_H * 0.55, d / 2 + 0.025);
+        frame.castShadow = true;
+        building.add(frame);
+        // Window glass
+        const win = new THREE.Mesh(
+          new THREE.BoxGeometry(winW, winH, 0.02),
+          windowMat
+        );
+        win.position.set(x, yBase + FLOOR_H * 0.55, d / 2 + 0.05);
+        building.add(win);
+
+        // Same on back
+        const frameB = frame.clone();
+        frameB.position.z = -d / 2 - 0.025;
+        building.add(frameB);
+        const winB = win.clone();
+        winB.position.z = -d / 2 - 0.05;
+        building.add(winB);
+
+        // Small balconies on floors 2 & 3
+        if (f === 1 || f === 2) {
+          const balc = new THREE.Mesh(
+            new THREE.BoxGeometry(winW + 0.5, 0.06, 0.5),
+            trimMat
+          );
+          balc.position.set(x, yBase + FLOOR_H * 0.18, d / 2 + 0.28);
+          balc.castShadow = true;
+          building.add(balc);
+          // Balcony railing (3 verticals + horizontal)
+          for (let v = 0; v < 3; v++) {
+            const post = new THREE.Mesh(
+              new THREE.BoxGeometry(0.03, 0.42, 0.03),
+              railMat
+            );
+            const px = x - (winW + 0.5) / 2 + v * ((winW + 0.5) / 2);
+            post.position.set(px, yBase + FLOOR_H * 0.18 + 0.24, d / 2 + 0.5);
+            post.castShadow = true;
+            building.add(post);
+          }
+          const top = new THREE.Mesh(
+            new THREE.BoxGeometry(winW + 0.5, 0.03, 0.03),
+            railMat
+          );
+          top.position.set(x, yBase + FLOOR_H * 0.18 + 0.45, d / 2 + 0.5);
+          building.add(top);
+        }
+      }
+
+      // Side windows (small) on each floor
+      const sideWinCount = 2;
+      for (let i = 0; i < sideWinCount; i++) {
+        const z = -d / 2 + (d / (sideWinCount + 1)) * (i + 1);
+        const sFrame = new THREE.Mesh(
+          new THREE.BoxGeometry(0.04, winH + 0.08, winW + 0.08),
+          trimMat
+        );
+        sFrame.position.set(w / 2 + 0.025, yBase + FLOOR_H * 0.55, z);
+        building.add(sFrame);
+        const sWin = new THREE.Mesh(
+          new THREE.BoxGeometry(0.02, winH, winW),
+          windowMat
+        );
+        sWin.position.set(w / 2 + 0.05, yBase + FLOOR_H * 0.55, z);
+        building.add(sWin);
+        // mirror on left
+        const sFrameL = sFrame.clone();
+        sFrameL.position.x = -w / 2 - 0.025;
+        building.add(sFrameL);
+        const sWinL = sWin.clone();
+        sWinL.position.x = -w / 2 - 0.05;
+        building.add(sWinL);
+      }
+    } else {
+      // Penthouse: floor-to-ceiling glass on front + side
+      const glassFront = new THREE.Mesh(
+        new THREE.BoxGeometry(w * 0.85, FLOOR_H * 0.82, 0.04),
+        glassMat
+      );
+      glassFront.position.set(0, yBase + FLOOR_H * 0.5, d / 2 + 0.02);
+      building.add(glassFront);
+
+      const glassBack = glassFront.clone();
+      glassBack.position.z = -d / 2 - 0.02;
+      building.add(glassBack);
+
+      const glassSide = new THREE.Mesh(
+        new THREE.BoxGeometry(0.04, FLOOR_H * 0.82, d * 0.7),
+        glassMat
+      );
+      glassSide.position.set(w / 2 + 0.02, yBase + FLOOR_H * 0.5, 0);
+      building.add(glassSide);
+      const glassSideL = glassSide.clone();
+      glassSideL.position.x = -w / 2 - 0.02;
+      building.add(glassSideL);
+    }
+  }
+
+  // Roof / Skydeck on top of penthouse (the top floor's roof becomes the "deeper roof"
+  // and we add a skydeck terrace above the penthouse)
+  // Actually skydeck = a usable terrace ABOVE the penthouse roof level.
+  const yTop = 0.35 + FLOORS * FLOOR_H;
+  const wTop = W_X - SETBACK_TOP * 2;
+  const dTop = D_Z - SETBACK_TOP * 2;
+
+  // Penthouse roof slab
+  const roof = new THREE.Mesh(
+    new THREE.BoxGeometry(wTop + 0.08, 0.08, dTop + 0.08),
+    roofMat
+  );
+  roof.position.y = yTop + 0.04;
+  roof.castShadow = true; roof.receiveShadow = true;
+  building.add(roof);
+
+  // Skydeck floor (slightly inset, cream stone)
+  const deck = new THREE.Mesh(
+    new THREE.BoxGeometry(wTop * 0.82, 0.04, dTop * 0.82),
+    new THREE.MeshStandardMaterial({ color: 0xeee5d2, roughness: 0.9 })
+  );
+  deck.position.y = yTop + 0.1;
+  deck.receiveShadow = true;
+  building.add(deck);
+
+  // Skydeck railing — glass panels on perimeter
+  const deckW = wTop * 0.82, deckD = dTop * 0.82;
+  const railGlassMat = new THREE.MeshStandardMaterial({
+    color: 0xdde6ec, roughness: 0.1, metalness: 0.5, transparent: true, opacity: 0.55
+  });
+  // Front
+  const railF = new THREE.Mesh(
+    new THREE.BoxGeometry(deckW, 0.4, 0.025), railGlassMat
+  );
+  railF.position.set(0, yTop + 0.32, deckD / 2);
+  building.add(railF);
+  const railB = railF.clone(); railB.position.z = -deckD / 2; building.add(railB);
+  const railR = new THREE.Mesh(
+    new THREE.BoxGeometry(0.025, 0.4, deckD), railGlassMat
+  );
+  railR.position.set(deckW / 2, yTop + 0.32, 0);
+  building.add(railR);
+  const railL = railR.clone(); railL.position.x = -deckW / 2; building.add(railL);
+
+  // Skydeck small details: planter + bench
+  const planter = new THREE.Mesh(
+    new THREE.BoxGeometry(0.6, 0.14, 0.3),
+    new THREE.MeshStandardMaterial({ color: 0xa39378, roughness: 0.95 })
+  );
+  planter.position.set(deckW / 2 - 0.5, yTop + 0.18, -deckD / 2 + 0.4);
+  planter.castShadow = true;
+  building.add(planter);
+
+  const bench = new THREE.Mesh(
+    new THREE.BoxGeometry(1.2, 0.08, 0.3),
+    new THREE.MeshStandardMaterial({ color: 0x4a3f30, roughness: 0.7 })
+  );
+  bench.position.set(-deckW / 2 + 0.7, yTop + 0.18, deckD / 2 - 0.4);
+  bench.castShadow = true;
+  building.add(bench);
+
+  // Center building so origin is bottom-center
+  building.position.set(0, 0, 0);
+  scene.add(building);
+
+  // Subtle scene fog for depth
+  scene.fog = new THREE.Fog(0xefe8da, 18, 38);
+
+  // --- Interactivity: drag to rotate, auto-rotate when idle ---
+  let isDragging = false;
+  let prevX = 0, prevY = 0;
+  let rotY = -0.4, rotX = 0.04;
+  let targetRotY = rotY, targetRotX = rotX;
+  let lastInteract = performance.now();
+
+  canvas.addEventListener('pointerdown', (e) => {
+    isDragging = true;
+    prevX = e.clientX; prevY = e.clientY;
+    canvas.setPointerCapture(e.pointerId);
+    lastInteract = performance.now();
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevX;
+    const dy = e.clientY - prevY;
+    targetRotY += dx * 0.008;
+    targetRotX = Math.max(-0.3, Math.min(0.45, targetRotX + dy * 0.005));
+    prevX = e.clientX; prevY = e.clientY;
+    lastInteract = performance.now();
+  });
+  canvas.addEventListener('pointerup', () => { isDragging = false; });
+  canvas.addEventListener('pointerleave', () => { isDragging = false; });
+
+  // Resize
+  function onResize() {
+    W = wrap.clientWidth; H = wrap.clientHeight;
+    camera.aspect = W / H; camera.updateProjectionMatrix();
+    renderer.setSize(W, H, false);
+  }
+  window.addEventListener('resize', onResize);
+
+  // Animation loop — render ALWAYS so the model is visible even before scrolling into view;
+  // only the orbit/auto-rotate physics is gated by visibility for perf.
+  let inView = true;
+  ScrollTrigger.create({
+    trigger: wrap, start: 'top bottom', end: 'bottom top',
+    onToggle: ({ isActive }) => { inView = isActive; }
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const idle = performance.now() - lastInteract > 2400;
+    if (idle && !isDragging && inView) targetRotY += 0.0025;
+
+    rotY += (targetRotY - rotY) * 0.08;
+    rotX += (targetRotX - rotX) * 0.08;
+    building.rotation.y = rotY;
+    building.rotation.x = rotX;
+
+    // Camera slight breathing
+    const t = performance.now() * 0.0003;
+    camera.position.x = 8 + Math.sin(t) * 0.2;
+    camera.lookAt(0, 2.5, 0);
+
+    renderer.render(scene, camera);
+  }
+  // Set initial size correctly, then render the first frame immediately
+  onResize();
+  renderer.render(scene, camera);
+  setTimeout(() => { onResize(); renderer.render(scene, camera); }, 50);
+  animate();
+}
+
+/* ========== THREE.JS SCENE 2 — PENTHOUSE FLOOR EXPLORER ========== */
+let _floorSceneInited = false;
+function initFloorScene() {
+  if (_floorSceneInited) return;
+  _floorSceneInited = true;
+
+  // Spline path: if a scene URL is configured, hand off to Spline and skip Three.js entirely.
+  // Note: sun/time toggles only animate the procedural Three.js scene; with Spline you'd wire
+  // these to Spline's own variables/states via the spline-viewer's API if your scene supports it.
+  if (SPLINE_SCENES.floor) {
+    const canvas = document.getElementById('floorCanvas');
+    const viewer = document.getElementById('floorSpline');
+    if (canvas) canvas.style.display = 'none';
+    if (viewer) {
+      viewer.setAttribute('url', SPLINE_SCENES.floor);
+      viewer.style.display = 'block';
+    }
+    return;
+  }
+
+  const canvas = document.getElementById('floorCanvas');
+  const wrap = canvas.parentElement;
+  let W = wrap.clientWidth, H = wrap.clientHeight;
+
+  const scene = new THREE.Scene();
+  scene.background = null;
+
+  // Isometric-ish perspective
+  const camera = new THREE.PerspectiveCamera(35, W / H, 0.1, 100);
+  camera.position.set(11, 11, 11);
+  camera.lookAt(0, 0.6, 0);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !IS_MOBILE, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_MOBILE ? 1.5 : 2));
+  renderer.setSize(W, H, false);
+  renderer.shadowMap.enabled = !IS_MOBILE;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+
+  // Materials (warm, light)
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0xe8dec9, roughness: 0.95 });
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xf2ebdb, roughness: 0.95 });
+  const wallMatHi = new THREE.MeshStandardMaterial({ color: 0xece2d0, roughness: 0.9, emissive: 0x000000 });
+  const wood = new THREE.MeshStandardMaterial({ color: 0xa07a55, roughness: 0.7 });
+  const sofa = new THREE.MeshStandardMaterial({ color: 0xcabba0, roughness: 0.8 });
+  const bedMat = new THREE.MeshStandardMaterial({ color: 0xddd2bb, roughness: 0.85 });
+  const stoneMat = new THREE.MeshStandardMaterial({ color: 0xd8cdb4, roughness: 0.9 });
+  const accentDark = new THREE.MeshStandardMaterial({ color: 0x3a342b, roughness: 0.5 });
+
+  // Lights
+  const ambient = new THREE.AmbientLight(0xffffff, 0.45);
+  scene.add(ambient);
+  const hemi = new THREE.HemisphereLight(0xfff5e1, 0x8a7a66, 0.4);
+  scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xfff0d4, 1.2);
+  sun.castShadow = true;
+  sun.shadow.mapSize.width = 1024;
+  sun.shadow.mapSize.height = 1024;
+  sun.shadow.camera.near = 0.5;
+  sun.shadow.camera.far = 30;
+  sun.shadow.camera.left = -8;
+  sun.shadow.camera.right = 8;
+  sun.shadow.camera.top = 8;
+  sun.shadow.camera.bottom = -8;
+  sun.shadow.bias = -0.0005;
+  scene.add(sun);
+
+  // Group: penthouse layout
+  const ph = new THREE.Group();
+
+  // Floor plate (~ representing 325m² scaled)
+  const PH_W = 9, PH_D = 7;
+  const floorPlate = new THREE.Mesh(
+    new THREE.BoxGeometry(PH_W, 0.1, PH_D),
+    floorMat
+  );
+  floorPlate.position.y = 0;
+  floorPlate.receiveShadow = true;
+  ph.add(floorPlate);
+
+  // Helper: low wall (so we can see in)
+  const WALL_H = 0.55;
+  const WALL_T = 0.08;
+  function lowWall(x1, z1, x2, z2, mat) {
+    const dx = x2 - x1, dz = z2 - z1;
+    const len = Math.sqrt(dx * dx + dz * dz);
+    const geo = new THREE.BoxGeometry(len, WALL_H, WALL_T);
+    const mesh = new THREE.Mesh(geo, mat || wallMat);
+    mesh.position.set((x1 + x2) / 2, WALL_H / 2 + 0.05, (z1 + z2) / 2);
+    mesh.rotation.y = -Math.atan2(dz, dx);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  }
+
+  // Outer perimeter (bounding the floor plate)
+  // Perimeter walls
+  ph.add(lowWall(-PH_W / 2, -PH_D / 2, PH_W / 2, -PH_D / 2));
+  ph.add(lowWall(PH_W / 2, -PH_D / 2, PH_W / 2, PH_D / 2));
+  ph.add(lowWall(PH_W / 2, PH_D / 2, -PH_W / 2, PH_D / 2));
+  ph.add(lowWall(-PH_W / 2, PH_D / 2, -PH_W / 2, -PH_D / 2));
+
+  // ---- Define rooms (data-driven for click targets) ----
+  // Layout:
+  // Left half = Living + Kitchen (open) + Dining
+  // Right half = Master Suite (BR + Bath + Dressing) + 2 Guest BRs + Skydeck
+  // Skydeck on the bottom-right corner (south-east)
+
+  // Internal walls
+  // Vertical wall splitting living from sleeping (x = 0.5)
+  ph.add(lowWall(0.5, -PH_D / 2 + 0.05, 0.5, PH_D / 2 - 0.05));
+  // Wall separating living (top-left) from kitchen (bottom-left): horizontal at z = 1 (kitchen open below)
+  // We keep it open (kitchen-living open plan) — no wall between
+
+  // Wall separating dining alcove from kitchen (x = -2, z = 0 to z = -PH_D/2)
+  // (Skip — keep open)
+
+  // Master suite walls (top right): vertical at x = 4, top half
+  ph.add(lowWall(4, -PH_D / 2 + 0.05, 4, -1));
+  // Master suite splits horizontally at z = -1 (bath) and z = -2.4 (dressing)
+  ph.add(lowWall(4, -1, PH_W / 2 - 0.05, -1));
+  // Inner master walls (separating dressing/bath/bedroom)
+  ph.add(lowWall(0.5, -1, 4, -1)); // hallway wall
+  // Guest BR 1 walls (right side, middle)
+  ph.add(lowWall(0.5, 0.7, PH_W / 2 - 0.05, 0.7));
+  // Guest BR 2 (right side, bottom) — by skydeck
+  ph.add(lowWall(0.5, 2.4, 3, 2.4));
+  ph.add(lowWall(3, 2.4, 3, PH_D / 2 - 0.05));
+
+  // Skydeck floor (bottom-right area)
+  const skydeck = new THREE.Mesh(
+    new THREE.BoxGeometry(2.7, 0.04, 1.9),
+    stoneMat
+  );
+  skydeck.position.set(PH_W / 2 - 1.55, 0.07, PH_D / 2 - 1.05);
+  skydeck.receiveShadow = true;
+  ph.add(skydeck);
+
+  // Skydeck railing (glass)
+  const skyRailMat = new THREE.MeshStandardMaterial({
+    color: 0xdde6ec, roughness: 0.1, metalness: 0.5, transparent: true, opacity: 0.5
+  });
+  const sr1 = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.42, 0.03), skyRailMat);
+  sr1.position.set(PH_W / 2 - 1.55, 0.32, PH_D / 2 - 0.1);
+  ph.add(sr1);
+  const sr2 = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.42, 1.9), skyRailMat);
+  sr2.position.set(PH_W / 2 - 0.2, 0.32, PH_D / 2 - 1.05);
+  ph.add(sr2);
+
+  // ---- Furniture (decorative blocks) ----
+  // Living room: sofa + coffee table (top-left)
+  const sofaMain = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.5, 0.85), sofa);
+  sofaMain.position.set(-3.0, 0.3, -1.8);
+  sofaMain.castShadow = true; sofaMain.receiveShadow = true;
+  ph.add(sofaMain);
+  const sofaSide = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.55, 1.6), sofa);
+  sofaSide.position.set(-1.6, 0.32, -2.6);
+  sofaSide.castShadow = true; sofaSide.receiveShadow = true;
+  ph.add(sofaSide);
+  const coffee = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.18, 0.6), wood);
+  coffee.position.set(-2.6, 0.14, -1.0);
+  coffee.castShadow = true;
+  ph.add(coffee);
+
+  // Kitchen island (mid-left)
+  const island = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.7, 0.9), stoneMat);
+  island.position.set(-2.6, 0.4, 1.6);
+  island.castShadow = true; island.receiveShadow = true;
+  ph.add(island);
+  // Kitchen counter
+  const counter = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.7, 0.5), stoneMat);
+  counter.position.set(-2.5, 0.4, 2.7);
+  counter.castShadow = true;
+  ph.add(counter);
+
+  // Dining table (between living and kitchen)
+  const table = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.06, 0.9), wood);
+  table.position.set(-0.5, 0.78, 0.0);
+  table.castShadow = true; table.receiveShadow = true;
+  ph.add(table);
+  for (let i = 0; i < 4; i++) {
+    const ang = i * Math.PI / 2;
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.78, 0.06), wood);
+    const ox = (i % 2 === 0) ? 0.78 : -0.78;
+    const oz = (i < 2) ? 0.38 : -0.38;
+    leg.position.set(-0.5 + ox, 0.39, 0 + oz);
+    leg.castShadow = true;
+    ph.add(leg);
+  }
+  // Dining chairs (4)
+  for (let i = 0; i < 4; i++) {
+    const chair = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.5, 0.4), sofa);
+    const positions = [
+      [-1.4, 0.3, 0], [0.4, 0.3, 0], [-0.5, 0.3, -0.7], [-0.5, 0.3, 0.7]
+    ];
+    chair.position.set(...positions[i]);
+    chair.castShadow = true;
+    ph.add(chair);
+  }
+
+  // Master Bedroom (top right)
+  const bed = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.4, 1.8), bedMat);
+  bed.position.set(2.6, 0.25, -2.5);
+  bed.castShadow = true; bed.receiveShadow = true;
+  ph.add(bed);
+  const headboard = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.7, 0.12), wood);
+  headboard.position.set(2.6, 0.4, -3.4);
+  headboard.castShadow = true;
+  ph.add(headboard);
+
+  // Master Bath (right top, smaller)
+  const tub = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.45, 0.7), stoneMat);
+  tub.position.set(4.6, 0.275, -2.5);
+  tub.castShadow = true;
+  ph.add(tub);
+
+  // Guest BR 1 (right middle)
+  const gb1 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.35, 1.4), bedMat);
+  gb1.position.set(2.4, 0.225, 1.5);
+  gb1.castShadow = true; gb1.receiveShadow = true;
+  ph.add(gb1);
+
+  // Guest BR 2 (right bottom-left of skydeck)
+  const gb2 = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.35, 1.2), bedMat);
+  gb2.position.set(1.5, 0.225, 3.0);
+  gb2.castShadow = true; gb2.receiveShadow = true;
+  ph.add(gb2);
+
+  // Skydeck: lounger + planter
+  const lounger = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.18, 0.55), accentDark);
+  lounger.position.set(PH_W / 2 - 1.4, 0.16, PH_D / 2 - 1.4);
+  lounger.castShadow = true;
+  ph.add(lounger);
+  const planter2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.3), wood);
+  planter2.position.set(PH_W / 2 - 0.5, 0.22, PH_D / 2 - 0.4);
+  planter2.castShadow = true;
+  ph.add(planter2);
+
+  // ---- Click hotspots: invisible plates over each room ----
+  const ROOMS = [
+    {
+      name: 'Wohnbereich',
+      meta: 'Offene Lounge mit Kamin · 38 m²',
+      x: -2.5, z: -1.6, w: 4, d: 3, key: 'living'
+    },
+    {
+      name: 'Küche & Esszimmer',
+      meta: 'Insel · Esstisch für 6 · 28 m²',
+      x: -2.2, z: 1.8, w: 4, d: 3, key: 'kitchen'
+    },
+    {
+      name: 'Master-Suite',
+      meta: 'Schlafzimmer · Bad en suite · Ankleide · 42 m²',
+      x: 2.5, z: -2.5, w: 3.5, d: 2.5, key: 'master'
+    },
+    {
+      name: 'Master-Bad',
+      meta: 'Freistehende Wanne · 14 m²',
+      x: 4.5, z: -2.0, w: 1.6, d: 1.6, key: 'bath'
+    },
+    {
+      name: 'Schlafzimmer 2',
+      meta: 'Eigener Balkon · 18 m²',
+      x: 2.4, z: 1.5, w: 2, d: 1.6, key: 'guest1'
+    },
+    {
+      name: 'Schlafzimmer 3',
+      meta: 'Süd-Ausrichtung · 16 m²',
+      x: 1.5, z: 3.0, w: 1.6, d: 1.4, key: 'guest2'
+    },
+    {
+      name: 'Privater Skydeck',
+      meta: '180° Panoramablick · 24 m²',
+      x: PH_W / 2 - 1.55, z: PH_D / 2 - 1.05, w: 2.7, d: 1.9, key: 'skydeck'
+    }
+  ];
+
+  const hotspotGroup = new THREE.Group();
+  const hotspotMeshes = [];
+  ROOMS.forEach((r) => {
+    const geo = new THREE.PlaneGeometry(r.w, r.d);
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0xb8956a, transparent: true, opacity: 0.0
+    });
+    const m = new THREE.Mesh(geo, mat);
+    m.rotation.x = -Math.PI / 2;
+    m.position.set(r.x, 0.06, r.z);
+    m.userData = r;
+    hotspotMeshes.push(m);
+    hotspotGroup.add(m);
+  });
+  ph.add(hotspotGroup);
+
+  // Center the penthouse group
+  ph.position.set(0, 0, 0);
+  scene.add(ph);
+
+  // Subtle fog
+  scene.fog = new THREE.Fog(0xefe8da, 22, 45);
+
+  // ---- Sun system ----
+  // Times: morning(7) — east-low; noon(13) — high overhead-south; evening(19) — west-low warm; night(23) — moon cool
+  const sunPresets = {
+    morning: {
+      pos: [-12, 6, 4], color: 0xffd9a0, intensity: 1.0,
+      ambient: 0.5, hemi: 0.4, hemiSky: 0xffe8c4, hemiGround: 0x8a7a66,
+      bg: 0xf6f0e1, fog: 0xf6f0e1
+    },
+    noon: {
+      pos: [3, 14, 5], color: 0xfff0d4, intensity: 1.3,
+      ambient: 0.55, hemi: 0.5, hemiSky: 0xfff5e1, hemiGround: 0x8a7a66,
+      bg: 0xf6f2ea, fog: 0xefe8da
+    },
+    evening: {
+      pos: [13, 5, -3], color: 0xff9b5e, intensity: 1.4,
+      ambient: 0.4, hemi: 0.35, hemiSky: 0xffb88a, hemiGround: 0x6a4838,
+      bg: 0xf2dfc3, fog: 0xeac9a3
+    },
+    night: {
+      pos: [-6, 9, -4], color: 0x6788a8, intensity: 0.5,
+      ambient: 0.18, hemi: 0.18, hemiSky: 0x2c3a52, hemiGround: 0x1a1a22,
+      bg: 0x1f2230, fog: 0x1a1d28
+    }
+  };
+
+  let currentTime = 'noon';
+  applySun('noon', true);
+
+  function applySun(timeKey, instant = false) {
+    const p = sunPresets[timeKey];
+    if (!p) return;
+    if (instant) {
+      sun.position.set(...p.pos);
+      sun.color.setHex(p.color);
+      sun.intensity = p.intensity;
+      ambient.intensity = p.ambient;
+      hemi.intensity = p.hemi;
+      hemi.color.setHex(p.hemiSky);
+      hemi.groundColor.setHex(p.hemiGround);
+      scene.fog.color.setHex(p.fog);
+      // Update wrap background
+      gsap.to(wrap, { backgroundColor: '#' + p.bg.toString(16).padStart(6, '0'), duration: 0.01 });
+      return;
+    }
+    // Animate
+    gsap.to(sun.position, {
+      x: p.pos[0], y: p.pos[1], z: p.pos[2], duration: 1.6, ease: 'expo.inOut'
+    });
+    gsap.to(sun.color, {
+      r: ((p.color >> 16) & 255) / 255, g: ((p.color >> 8) & 255) / 255, b: (p.color & 255) / 255,
+      duration: 1.6, ease: 'expo.inOut'
+    });
+    gsap.to(sun, { intensity: p.intensity, duration: 1.6, ease: 'expo.inOut' });
+    gsap.to(ambient, { intensity: p.ambient, duration: 1.6, ease: 'expo.inOut' });
+    gsap.to(hemi, { intensity: p.hemi, duration: 1.6, ease: 'expo.inOut' });
+    gsap.to(hemi.color, {
+      r: ((p.hemiSky >> 16) & 255) / 255, g: ((p.hemiSky >> 8) & 255) / 255, b: (p.hemiSky & 255) / 255,
+      duration: 1.6, ease: 'expo.inOut'
+    });
+    gsap.to(hemi.groundColor, {
+      r: ((p.hemiGround >> 16) & 255) / 255, g: ((p.hemiGround >> 8) & 255) / 255, b: (p.hemiGround & 255) / 255,
+      duration: 1.6, ease: 'expo.inOut'
+    });
+    gsap.to(scene.fog.color, {
+      r: ((p.fog >> 16) & 255) / 255, g: ((p.fog >> 8) & 255) / 255, b: (p.fog & 255) / 255,
+      duration: 1.6, ease: 'expo.inOut'
+    });
+    gsap.to(wrap, {
+      backgroundColor: '#' + p.bg.toString(16).padStart(6, '0'),
+      duration: 1.6, ease: 'expo.inOut'
+    });
+  }
+
+  // Sun control buttons
+  document.querySelectorAll('.sun-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const time = btn.dataset.time;
+      document.querySelectorAll('.sun-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTime = time;
+      applySun(time);
+    });
+  });
+
+  // ---- Click hotspots (raycasting) ----
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const roomInfo = document.getElementById('roomInfo');
+  const roomNameEl = document.getElementById('roomName');
+  const roomMetaEl = document.getElementById('roomMeta');
+  let activeRoom = null;
+  const highlightMaterial = new THREE.MeshStandardMaterial({
+    color: 0xb8956a, transparent: true, opacity: 0.18, depthWrite: false
+  });
+
+  function clearHighlight() {
+    hotspotMeshes.forEach((m) => { m.material.opacity = 0.0; });
+  }
+
+  canvas.addEventListener('pointermove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(hotspotMeshes);
+    hotspotMeshes.forEach((m) => { m.material.opacity = 0.0; });
+    if (hits.length) {
+      hits[0].object.material.opacity = 0.12;
+      canvas.style.cursor = 'pointer';
+    } else {
+      canvas.style.cursor = 'auto';
+    }
+  });
+
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(hotspotMeshes);
+    if (hits.length) {
+      const r = hits[0].object.userData;
+      activeRoom = r.key;
+      hotspotMeshes.forEach((m) => {
+        m.material.opacity = m.userData.key === r.key ? 0.22 : 0.0;
+      });
+      roomNameEl.textContent = r.name;
+      roomMetaEl.textContent = r.meta;
+      roomInfo.classList.add('visible');
+      gsap.fromTo(roomInfo, { y: 14 }, { y: 0, duration: 0.6, ease: 'expo.out' });
+    }
+  });
+
+  // ---- Animation: gentle orbit ----
+  let baseAngle = Math.PI / 4;
+  let lastInteract = performance.now();
+  let inView = true;
+  ScrollTrigger.create({
+    trigger: wrap, start: 'top bottom', end: 'bottom top',
+    onToggle: ({ isActive }) => { inView = isActive; }
+  });
+
+  function onResize() {
+    W = wrap.clientWidth; H = wrap.clientHeight;
+    camera.aspect = W / H; camera.updateProjectionMatrix();
+    renderer.setSize(W, H, false);
+  }
+  window.addEventListener('resize', onResize);
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const t = performance.now() * 0.00012;
+    if (inView) baseAngle += 0.0009;
+    const radius = 14;
+    camera.position.x = Math.sin(baseAngle) * radius;
+    camera.position.z = Math.cos(baseAngle) * radius;
+    camera.position.y = 11 + Math.sin(t * 2) * 0.2;
+    camera.lookAt(0, 0.6, 0);
+    renderer.render(scene, camera);
+  }
+  onResize();
+  renderer.render(scene, camera);
+  setTimeout(() => { onResize(); renderer.render(scene, camera); }, 50);
+  animate();
+}
+
+/* ========== BOOKING FORM ========== */
+function initBookingForm() {
+  // Persona selector
+  document.querySelectorAll('#segPersona .form-seg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#segPersona .form-seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Submission (demo)
+  const form = document.getElementById('bookingForm');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submit = form.querySelector('.form-submit');
+      const original = submit.innerHTML;
+      submit.innerHTML = 'Anfrage gesendet · Vielen Dank';
+      submit.style.background = 'var(--accent)';
+      setTimeout(() => {
+        submit.innerHTML = original;
+        submit.style.background = '';
+        form.reset();
+      }, 3500);
+    });
+  }
+}
+
+/* ========== ANCHOR SMOOTH SCROLL (Lenis-aware) ========== */
+document.querySelectorAll('a[href^="#"]').forEach((a) => {
+  a.addEventListener('click', (e) => {
+    const id = a.getAttribute('href');
+    if (id.length < 2) return;
+    const target = document.querySelector(id);
+    if (!target) return;
+    e.preventDefault();
+    if (lenis) {
+      lenis.scrollTo(target, { offset: 0, duration: 1.4, easing: (t) => 1 - Math.pow(1 - t, 3) });
+    } else {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+/* ========== INDEPENDENT FALLBACK ==========
+   If the loader-chain ever fails to fire (slow CDN, hidden tab during load,
+   GSAP timeline error, etc.), force-reveal everything and init the 3D scenes
+   so the page is never stuck in a half-rendered state. Re-entry guards above
+   ensure these calls are safe to run even when the loader-chain succeeded. */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    try {
+      const loader = document.getElementById('loader');
+      if (loader && loader.style.display !== 'none') {
+        loader.style.display = 'none';
+      }
+      revealHero();
+      initScrollReveals();
+    } catch (err) {
+      console.warn('Fallback init error:', err);
+    }
+  }, 6000);
+});
+</script>
+</body>
+</html>
