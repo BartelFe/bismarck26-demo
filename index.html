@@ -502,6 +502,12 @@ section {
   min-height: 65vh;
   overflow: hidden;
 }
+.arch-canvas-wrap::after,
+.floor-canvas-wrap::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(26, 24, 19, 0.16) 100%);
+  z-index: 2;
+}
 .arch-canvas-wrap canvas {
   width: 100%; height: 100%; display: block;
   touch-action: none;  /* let our pointer-drag handle gestures, prevent page-scroll fight */
@@ -509,6 +515,7 @@ section {
 .arch-canvas-hint {
   position: absolute;
   bottom: 1.5rem; left: 1.5rem;
+  z-index: 3;
   font-size: 0.68rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -683,6 +690,7 @@ section {
 .room-info {
   position: absolute;
   bottom: 1.5rem; left: 1.5rem;
+  z-index: 3;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s var(--ease-out-expo);
@@ -706,6 +714,7 @@ section {
 .floor-hint {
   position: absolute;
   top: 1.5rem; right: 1.5rem;
+  z-index: 3;
   font-size: 0.68rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -1517,6 +1526,93 @@ const SPLINE_SCENES = {
 const IS_TOUCH = window.matchMedia('(hover: none)').matches || 'ontouchstart' in window;
 const IS_MOBILE = window.matchMedia('(max-width: 720px)').matches;
 
+/* ========== PROCEDURAL HDR-LIKE ENVIRONMENT ==========
+   Builds a soft, warm sky/sun/ground env scene and pre-filters it through PMREM.
+   This is what makes glass actually reflect, metal actually shine, and PBR
+   materials sit in believable light. Single biggest visual lift in the file. */
+function buildPMREMEnvironment(renderer, mood) {
+  const envScene = new THREE.Scene();
+  const M = mood || {};
+  const skyTop    = M.skyTop    || 0xc9d4e0;
+  const skyHor    = M.skyHor    || 0xead9bb;
+  const skyGround = M.skyGround || 0x756656;
+  const sunCol    = M.sunCol    || 0xfff0d4;
+
+  // Sky dome (back-side gradient via two stacked hemispheres)
+  const upper = new THREE.Mesh(
+    new THREE.SphereGeometry(60, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color: skyTop, side: THREE.BackSide })
+  );
+  envScene.add(upper);
+  const horizon = new THREE.Mesh(
+    new THREE.SphereGeometry(60, 24, 12, 0, Math.PI * 2, Math.PI * 0.45, Math.PI * 0.15),
+    new THREE.MeshBasicMaterial({ color: skyHor, side: THREE.BackSide })
+  );
+  envScene.add(horizon);
+  const lower = new THREE.Mesh(
+    new THREE.SphereGeometry(60, 24, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color: skyGround, side: THREE.BackSide })
+  );
+  envScene.add(lower);
+
+  // Sun disc — bright key for reflective highlights
+  const sunGeo = new THREE.SphereGeometry(4, 12, 12);
+  const sunMat = new THREE.MeshBasicMaterial({ color: sunCol });
+  const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+  sunMesh.position.set(18, 22, 8);
+  envScene.add(sunMesh);
+
+  // PMREM filter for proper PBR
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  const target = pmrem.fromScene(envScene, 0.04, 0.1, 100);
+  pmrem.dispose();
+  return target.texture;
+}
+
+/* Generate a procedural parquet wood texture via canvas — used for penthouse floor */
+function makeParquetTexture(repeatX, repeatZ) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  // Base wood tone
+  ctx.fillStyle = '#a07a55';
+  ctx.fillRect(0, 0, 512, 512);
+  // Plank rows (herringbone-ish: alternating direction)
+  const plankW = 64, plankH = 16;
+  for (let y = 0; y < 512; y += plankH) {
+    const offset = (Math.floor(y / plankH) % 2) * (plankW / 2);
+    for (let x = -plankW; x < 512 + plankW; x += plankW) {
+      const px = x + offset;
+      // Random wood tone variation
+      const tone = 0.85 + Math.random() * 0.3;
+      const r = Math.floor(160 * tone);
+      const g = Math.floor(122 * tone);
+      const b = Math.floor(85 * tone);
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fillRect(px, y, plankW - 1, plankH - 1);
+      // Subtle grain lines
+      ctx.strokeStyle = `rgba(70, 50, 30, ${0.15 + Math.random() * 0.1})`;
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        const ly = y + Math.random() * plankH;
+        ctx.moveTo(px, ly);
+        ctx.bezierCurveTo(px + plankW * 0.3, ly + (Math.random() - 0.5) * 4,
+                          px + plankW * 0.7, ly + (Math.random() - 0.5) * 4,
+                          px + plankW, ly);
+        ctx.stroke();
+      }
+    }
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(repeatX || 4, repeatZ || 4);
+  tex.encoding = THREE.sRGBEncoding;
+  tex.anisotropy = 4;
+  return tex;
+}
+
 /* ========== LENIS SMOOTH SCROLL ========== */
 let lenis = null;
 const _prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1773,17 +1869,25 @@ function initBuildingScene() {
   renderer.shadowMap.enabled = !IS_MOBILE;     // shadows are expensive — drop on mobile
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  renderer.physicallyCorrectLights = true;
 
-  // Lighting — Light Modern
-  const hemi = new THREE.HemisphereLight(0xfff5e1, 0xb8a888, 0.55);
+  // PBR environment — softens light, gives glass/metal believable reflections
+  scene.environment = buildPMREMEnvironment(renderer, {
+    skyTop: 0xcad6e2, skyHor: 0xefdfc1, skyGround: 0x6e5e4d, sunCol: 0xfff0d4
+  });
+
+  // Lighting — Light Modern (slightly toned down because env now contributes)
+  const hemi = new THREE.HemisphereLight(0xfff5e1, 0xb8a888, 0.35);
   scene.add(hemi);
-  const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.18);
   scene.add(ambient);
-  const sun = new THREE.DirectionalLight(0xfff0d4, 1.0);
+  const sun = new THREE.DirectionalLight(0xfff0d4, 2.4);
   sun.position.set(8, 12, 6);
   sun.castShadow = true;
-  sun.shadow.mapSize.width = 1024;
-  sun.shadow.mapSize.height = 1024;
+  sun.shadow.mapSize.width = IS_MOBILE ? 512 : 2048;
+  sun.shadow.mapSize.height = IS_MOBILE ? 512 : 2048;
   sun.shadow.camera.near = 0.5;
   sun.shadow.camera.far = 40;
   sun.shadow.camera.left = -10;
@@ -1791,19 +1895,44 @@ function initBuildingScene() {
   sun.shadow.camera.top = 10;
   sun.shadow.camera.bottom = -10;
   sun.shadow.bias = -0.0005;
+  sun.shadow.radius = 4;
   scene.add(sun);
-  const fill = new THREE.DirectionalLight(0xc9d8e5, 0.4);
+  const fill = new THREE.DirectionalLight(0xc9d8e5, 0.6);
   fill.position.set(-6, 4, -4);
   scene.add(fill);
 
-  // Materials
-  const facadeMat = new THREE.MeshStandardMaterial({ color: 0xece2d0, roughness: 0.92, metalness: 0.0 });
-  const trimMat = new THREE.MeshStandardMaterial({ color: 0xd9caa8, roughness: 0.85 });
-  const windowMat = new THREE.MeshStandardMaterial({ color: 0x2a2823, roughness: 0.3, metalness: 0.1 });
-  const glassMat = new THREE.MeshStandardMaterial({ color: 0xb6c8d4, roughness: 0.15, metalness: 0.6, transparent: true, opacity: 0.8 });
-  const railMat = new THREE.MeshStandardMaterial({ color: 0x36322c, roughness: 0.6, metalness: 0.4 });
-  const roofMat = new THREE.MeshStandardMaterial({ color: 0xb8a890, roughness: 0.95 });
-  const floorMat = new THREE.MeshStandardMaterial({ color: 0xe5dcc8, roughness: 0.95 });
+  // Materials — PBR-tuned. envMapIntensity >1 boosts the procedural envmap effect.
+  const facadeMat = new THREE.MeshStandardMaterial({
+    color: 0xefe5d3, roughness: 0.78, metalness: 0.02, envMapIntensity: 0.7
+  });
+  const trimMat = new THREE.MeshStandardMaterial({
+    color: 0xddccaa, roughness: 0.72, metalness: 0.05, envMapIntensity: 0.8
+  });
+  const stoneMat = new THREE.MeshStandardMaterial({
+    color: 0xc4b59a, roughness: 0.88, metalness: 0.0, envMapIntensity: 0.6
+  });
+  const windowMat = new THREE.MeshStandardMaterial({
+    color: 0x1b1a17, roughness: 0.18, metalness: 0.4, envMapIntensity: 1.4
+  });
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0xc2d0d8, roughness: 0.04, metalness: 0.0,
+    transparent: true, opacity: 0.55, envMapIntensity: 1.6
+  });
+  const railMat = new THREE.MeshStandardMaterial({
+    color: 0x2a2722, roughness: 0.32, metalness: 0.85, envMapIntensity: 1.2
+  });
+  const roofMat = new THREE.MeshStandardMaterial({
+    color: 0xa89888, roughness: 0.85, metalness: 0.05, envMapIntensity: 0.6
+  });
+  const floorMat = new THREE.MeshStandardMaterial({
+    color: 0xddd2bd, roughness: 0.92, metalness: 0.0, envMapIntensity: 0.5
+  });
+  const foliageMat = new THREE.MeshStandardMaterial({
+    color: 0x6f7a4e, roughness: 0.92, metalness: 0.0
+  });
+  const trunkMat = new THREE.MeshStandardMaterial({
+    color: 0x4a3a2a, roughness: 0.95, metalness: 0.0
+  });
 
   // Container group for building
   const building = new THREE.Group();
@@ -1882,6 +2011,28 @@ function initBuildingScene() {
         win.position.set(x, yBase + FLOOR_H * 0.55, d / 2 + 0.05);
         building.add(win);
 
+        // Mullions: 1 vertical + 1 horizontal cross-divider (classic Schwabing window)
+        const mullV = new THREE.Mesh(
+          new THREE.BoxGeometry(0.018, winH, 0.025),
+          trimMat
+        );
+        mullV.position.set(x, yBase + FLOOR_H * 0.55, d / 2 + 0.06);
+        building.add(mullV);
+        const mullH = new THREE.Mesh(
+          new THREE.BoxGeometry(winW, 0.018, 0.025),
+          trimMat
+        );
+        mullH.position.set(x, yBase + FLOOR_H * 0.55 + 0.05, d / 2 + 0.06);
+        building.add(mullH);
+        // Sill below window
+        const sill = new THREE.Mesh(
+          new THREE.BoxGeometry(winW + 0.16, 0.04, 0.08),
+          stoneMat
+        );
+        sill.position.set(x, yBase + FLOOR_H * 0.55 - winH / 2 - 0.04, d / 2 + 0.04);
+        sill.castShadow = true;
+        building.add(sill);
+
         // Same on back
         const frameB = frame.clone();
         frameB.position.z = -d / 2 - 0.025;
@@ -1889,6 +2040,9 @@ function initBuildingScene() {
         const winB = win.clone();
         winB.position.z = -d / 2 - 0.05;
         building.add(winB);
+        const mullVB = mullV.clone(); mullVB.position.z = -d / 2 - 0.06; building.add(mullVB);
+        const mullHB = mullH.clone(); mullHB.position.z = -d / 2 - 0.06; building.add(mullHB);
+        const sillB = sill.clone(); sillB.position.z = -d / 2 - 0.04; building.add(sillB);
 
         // Small balconies on floors 2 & 3
         if (f === 1 || f === 2) {
@@ -2012,26 +2166,117 @@ function initBuildingScene() {
   building.add(railR);
   const railL = railR.clone(); railL.position.x = -deckW / 2; building.add(railL);
 
-  // Skydeck small details: planter + bench
-  const planter = new THREE.Mesh(
-    new THREE.BoxGeometry(0.6, 0.14, 0.3),
-    new THREE.MeshStandardMaterial({ color: 0xa39378, roughness: 0.95 })
-  );
-  planter.position.set(deckW / 2 - 0.5, yTop + 0.18, -deckD / 2 + 0.4);
-  planter.castShadow = true;
-  building.add(planter);
+  // Skydeck planters (with greenery suggested via foliage spheres)
+  function addSkydeckPlanter(px, pz) {
+    const p = new THREE.Mesh(
+      new THREE.BoxGeometry(0.6, 0.18, 0.3),
+      new THREE.MeshStandardMaterial({ color: 0xb0a085, roughness: 0.85, envMapIntensity: 0.6 })
+    );
+    p.position.set(px, yTop + 0.2, pz);
+    p.castShadow = true;
+    building.add(p);
+    // Greenery: 2 squashed spheres
+    for (let g = 0; g < 2; g++) {
+      const f = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 8), foliageMat);
+      f.scale.set(1, 0.7, 1);
+      f.position.set(px - 0.13 + g * 0.26, yTop + 0.32, pz);
+      f.castShadow = true;
+      building.add(f);
+    }
+  }
+  addSkydeckPlanter(deckW / 2 - 0.5, -deckD / 2 + 0.4);
+  addSkydeckPlanter(-deckW / 2 + 0.5, -deckD / 2 + 0.4);
 
-  const bench = new THREE.Mesh(
-    new THREE.BoxGeometry(1.2, 0.08, 0.3),
-    new THREE.MeshStandardMaterial({ color: 0x4a3f30, roughness: 0.7 })
+  // Sun lounger (instead of plain bench) — 2 stacked boxes for cushion + frame
+  const loungerFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(1.4, 0.06, 0.5),
+    new THREE.MeshStandardMaterial({ color: 0x3a3128, roughness: 0.45, metalness: 0.3 })
   );
-  bench.position.set(-deckW / 2 + 0.7, yTop + 0.18, deckD / 2 - 0.4);
-  bench.castShadow = true;
-  building.add(bench);
+  loungerFrame.position.set(-deckW / 2 + 0.85, yTop + 0.16, deckD / 2 - 0.45);
+  loungerFrame.castShadow = true;
+  building.add(loungerFrame);
+  const loungerCushion = new THREE.Mesh(
+    new THREE.BoxGeometry(1.35, 0.08, 0.45),
+    new THREE.MeshStandardMaterial({ color: 0xe5dac3, roughness: 0.85 })
+  );
+  loungerCushion.position.set(-deckW / 2 + 0.85, yTop + 0.23, deckD / 2 - 0.45);
+  loungerCushion.castShadow = true;
+  building.add(loungerCushion);
+
+  // Roof parapet (low ledge wrapping the penthouse roof outside the glass railing)
+  const parapetMat = stoneMat;
+  const PARA_H = 0.12;
+  const wPara = wTop + 0.16, dPara = dTop + 0.16;
+  for (const [w_, h_, d_, ox, oy, oz] of [
+    [wPara, PARA_H, 0.06, 0, yTop + 0.12 + PARA_H / 2, dPara / 2],
+    [wPara, PARA_H, 0.06, 0, yTop + 0.12 + PARA_H / 2, -dPara / 2],
+    [0.06, PARA_H, dPara, wPara / 2, yTop + 0.12 + PARA_H / 2, 0],
+    [0.06, PARA_H, dPara, -wPara / 2, yTop + 0.12 + PARA_H / 2, 0]
+  ]) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w_, h_, d_), parapetMat);
+    m.position.set(ox, oy, oz);
+    m.castShadow = true; m.receiveShadow = true;
+    building.add(m);
+  }
+
+  // Top-floor cornice — wraps around at the penthouse-setback line
+  const setbackY = 0.35 + (FLOORS - 1) * FLOOR_H;
+  const cornM = new THREE.Mesh(
+    new THREE.BoxGeometry(W_X + 0.22, 0.12, D_Z + 0.22),
+    stoneMat
+  );
+  cornM.position.y = setbackY + 0.04;
+  cornM.castShadow = true; cornM.receiveShadow = true;
+  building.add(cornM);
+
+  // Hedge along plinth — front and back
+  const hedgeMat = foliageMat;
+  for (const zSign of [1, -1]) {
+    const hedge = new THREE.Mesh(
+      new THREE.BoxGeometry(W_X * 0.8, 0.32, 0.32),
+      hedgeMat
+    );
+    hedge.position.set(0, 0.16, zSign * (D_Z / 2 + 0.5));
+    hedge.castShadow = true; hedge.receiveShadow = true;
+    building.add(hedge);
+  }
 
   // Center building so origin is bottom-center
   building.position.set(0, 0, 0);
   scene.add(building);
+
+  // Stadtkontext: 5 trees scattered around the ground (separate from building so they
+  // don't rotate when the user drags the model)
+  const treeGroup = new THREE.Group();
+  const TREE_POSITIONS = [
+    [-7, 0, 5], [7, 0, 6], [-6, 0, -7], [8, 0, -4], [0, 0, 9]
+  ];
+  TREE_POSITIONS.forEach(([tx, ty, tz]) => {
+    const tree = new THREE.Group();
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.1, 1.4, 8), trunkMat
+    );
+    trunk.position.y = 0.7;
+    trunk.castShadow = true;
+    tree.add(trunk);
+    // 3 stacked foliage spheres for organic feel
+    for (let i = 0; i < 3; i++) {
+      const r = 0.5 + Math.random() * 0.15;
+      const f = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), foliageMat);
+      f.position.set(
+        (Math.random() - 0.5) * 0.3,
+        1.3 + i * 0.35 + Math.random() * 0.1,
+        (Math.random() - 0.5) * 0.3
+      );
+      f.castShadow = true;
+      tree.add(f);
+    }
+    tree.position.set(tx, ty, tz);
+    tree.rotation.y = Math.random() * Math.PI * 2;
+    tree.scale.setScalar(0.85 + Math.random() * 0.4);
+    treeGroup.add(tree);
+  });
+  scene.add(treeGroup);
 
   // Subtle scene fog for depth
   scene.fog = new THREE.Fog(0xefe8da, 18, 38);
@@ -2072,9 +2317,26 @@ function initBuildingScene() {
   // Animation loop — render ALWAYS so the model is visible even before scrolling into view;
   // only the orbit/auto-rotate physics is gated by visibility for perf.
   let inView = true;
+  let camLock = { x: 8, y: 5.5, z: 11, lookY: 2.5, breath: true };
   ScrollTrigger.create({
     trigger: wrap, start: 'top bottom', end: 'bottom top',
     onToggle: ({ isActive }) => { inView = isActive; }
+  });
+
+  // Cinematic intro: when the section first enters view, dolly in from a wide angle
+  camera.position.set(14, 8.5, 16);
+  camLock.x = 14; camLock.y = 8.5; camLock.z = 16; camLock.breath = false;
+  ScrollTrigger.create({
+    trigger: '.architecture',
+    start: 'top 75%',
+    once: true,
+    onEnter: () => {
+      gsap.to(camLock, {
+        x: 8, y: 5.5, z: 11,
+        duration: 2.4, ease: 'expo.out',
+        onComplete: () => { camLock.breath = true; }
+      });
+    }
   });
 
   function animate() {
@@ -2087,10 +2349,11 @@ function initBuildingScene() {
     building.rotation.y = rotY;
     building.rotation.x = rotX;
 
-    // Camera slight breathing
+    // Camera with cinematic-driven base, plus optional subtle breathing
     const t = performance.now() * 0.0003;
-    camera.position.x = 8 + Math.sin(t) * 0.2;
-    camera.lookAt(0, 2.5, 0);
+    const breath = camLock.breath ? Math.sin(t) * 0.2 : 0;
+    camera.position.set(camLock.x + breath, camLock.y, camLock.z);
+    camera.lookAt(0, camLock.lookY, 0);
 
     renderer.render(scene, camera);
   }
@@ -2139,26 +2402,60 @@ function initFloorScene() {
   renderer.shadowMap.enabled = !IS_MOBILE;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.physicallyCorrectLights = true;
 
-  // Materials (warm, light)
-  const floorMat = new THREE.MeshStandardMaterial({ color: 0xe8dec9, roughness: 0.95 });
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0xf2ebdb, roughness: 0.95 });
-  const wallMatHi = new THREE.MeshStandardMaterial({ color: 0xece2d0, roughness: 0.9, emissive: 0x000000 });
-  const wood = new THREE.MeshStandardMaterial({ color: 0xa07a55, roughness: 0.7 });
-  const sofa = new THREE.MeshStandardMaterial({ color: 0xcabba0, roughness: 0.8 });
-  const bedMat = new THREE.MeshStandardMaterial({ color: 0xddd2bb, roughness: 0.85 });
-  const stoneMat = new THREE.MeshStandardMaterial({ color: 0xd8cdb4, roughness: 0.9 });
-  const accentDark = new THREE.MeshStandardMaterial({ color: 0x3a342b, roughness: 0.5 });
+  // PBR environment — softer interior mood
+  scene.environment = buildPMREMEnvironment(renderer, {
+    skyTop: 0xd6dee6, skyHor: 0xefe2c8, skyGround: 0x8a7a64, sunCol: 0xfff0d4
+  });
 
-  // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.45);
+  // Materials (warm, light) — PBR-tuned for interior architecture
+  const parquetTex = makeParquetTexture(3, 3);
+  const floorMat = new THREE.MeshStandardMaterial({
+    map: parquetTex, roughness: 0.55, metalness: 0.05, envMapIntensity: 0.5
+  });
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: 0xf4ede0, roughness: 0.92, metalness: 0.0, envMapIntensity: 0.4
+  });
+  const wallMatHi = new THREE.MeshStandardMaterial({
+    color: 0xede3d0, roughness: 0.88, envMapIntensity: 0.4
+  });
+  const wood = new THREE.MeshStandardMaterial({
+    color: 0x8d6a47, roughness: 0.55, metalness: 0.05, envMapIntensity: 0.6
+  });
+  const sofa = new THREE.MeshStandardMaterial({
+    color: 0xcdbea2, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.4
+  });
+  const bedMat = new THREE.MeshStandardMaterial({
+    color: 0xe2d7c0, roughness: 0.8, envMapIntensity: 0.4
+  });
+  const stoneMat = new THREE.MeshStandardMaterial({
+    color: 0xddd2bb, roughness: 0.55, metalness: 0.1, envMapIntensity: 0.7
+  });
+  const accentDark = new THREE.MeshStandardMaterial({
+    color: 0x2c2722, roughness: 0.35, metalness: 0.5, envMapIntensity: 1.0
+  });
+  const foliageMatI = new THREE.MeshStandardMaterial({
+    color: 0x6f7a4e, roughness: 0.92
+  });
+  const potMat = new THREE.MeshStandardMaterial({
+    color: 0xc4b59a, roughness: 0.78, envMapIntensity: 0.5
+  });
+  const metalMat = new THREE.MeshStandardMaterial({
+    color: 0x8a7e6c, roughness: 0.3, metalness: 0.85, envMapIntensity: 1.0
+  });
+
+  // Lights — physically-correct + tone mapping requires higher absolute values
+  const ambient = new THREE.AmbientLight(0xffffff, 0.25);
   scene.add(ambient);
-  const hemi = new THREE.HemisphereLight(0xfff5e1, 0x8a7a66, 0.4);
+  const hemi = new THREE.HemisphereLight(0xfff5e1, 0x8a7a66, 0.3);
   scene.add(hemi);
-  const sun = new THREE.DirectionalLight(0xfff0d4, 1.2);
+  const sun = new THREE.DirectionalLight(0xfff0d4, 2.8);
   sun.castShadow = true;
-  sun.shadow.mapSize.width = 1024;
-  sun.shadow.mapSize.height = 1024;
+  sun.shadow.mapSize.width = IS_MOBILE ? 512 : 2048;
+  sun.shadow.mapSize.height = IS_MOBILE ? 512 : 2048;
   sun.shadow.camera.near = 0.5;
   sun.shadow.camera.far = 30;
   sun.shadow.camera.left = -8;
@@ -2166,6 +2463,7 @@ function initFloorScene() {
   sun.shadow.camera.top = 8;
   sun.shadow.camera.bottom = -8;
   sun.shadow.bias = -0.0005;
+  sun.shadow.radius = 4;
   scene.add(sun);
 
   // Group: penthouse layout
@@ -2329,15 +2627,131 @@ function initFloorScene() {
   gb2.castShadow = true; gb2.receiveShadow = true;
   ph.add(gb2);
 
-  // Skydeck: lounger + planter
-  const lounger = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.18, 0.55), accentDark);
-  lounger.position.set(PH_W / 2 - 1.4, 0.16, PH_D / 2 - 1.4);
-  lounger.castShadow = true;
-  ph.add(lounger);
-  const planter2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.3), wood);
+  // Skydeck: sun lounger (frame + cushion) + olive-tree-style planter
+  const loungerFrame2 = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.06, 0.55), accentDark);
+  loungerFrame2.position.set(PH_W / 2 - 1.4, 0.14, PH_D / 2 - 1.4);
+  loungerFrame2.castShadow = true;
+  ph.add(loungerFrame2);
+  const loungerCush = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.08, 0.5), bedMat);
+  loungerCush.position.set(PH_W / 2 - 1.4, 0.21, PH_D / 2 - 1.4);
+  loungerCush.castShadow = true;
+  ph.add(loungerCush);
+
+  // Skydeck planter with olive tree
+  const planter2 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.18, 0.3, 12), potMat);
   planter2.position.set(PH_W / 2 - 0.5, 0.22, PH_D / 2 - 0.4);
   planter2.castShadow = true;
   ph.add(planter2);
+  const oliveTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.5, 6), wood);
+  oliveTrunk.position.set(PH_W / 2 - 0.5, 0.5, PH_D / 2 - 0.4);
+  oliveTrunk.castShadow = true;
+  ph.add(oliveTrunk);
+  for (let i = 0; i < 3; i++) {
+    const sph = new THREE.Mesh(new THREE.SphereGeometry(0.18 + Math.random() * 0.04, 8, 8), foliageMatI);
+    sph.position.set(
+      PH_W / 2 - 0.5 + (Math.random() - 0.5) * 0.18,
+      0.78 + i * 0.12 + Math.random() * 0.05,
+      PH_D / 2 - 0.4 + (Math.random() - 0.5) * 0.18
+    );
+    sph.castShadow = true;
+    ph.add(sph);
+  }
+
+  // ---- Lived-in details: cushions, books, vases, indoor plants ----
+  // Sofa cushions (2 small, contrasting tone)
+  for (let i = 0; i < 2; i++) {
+    const cushion = new THREE.Mesh(
+      new THREE.BoxGeometry(0.32, 0.18, 0.28),
+      new THREE.MeshStandardMaterial({ color: i === 0 ? 0xc7b89a : 0x8d7a5e, roughness: 0.85 })
+    );
+    cushion.position.set(-3.5 + i * 0.55, 0.55, -2.0);
+    cushion.castShadow = true;
+    ph.add(cushion);
+  }
+
+  // Coffee-table styling: vase with branches
+  const vase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.18, 12), stoneMat);
+  vase.position.set(-2.6, 0.32, -1.0);
+  vase.castShadow = true;
+  ph.add(vase);
+  const branches = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), foliageMatI);
+  branches.position.set(-2.6, 0.55, -1.0);
+  branches.scale.set(1, 1.4, 1);
+  branches.castShadow = true;
+  ph.add(branches);
+  // Stack of books
+  const books = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.08, 0.16), accentDark);
+  books.position.set(-2.85, 0.22, -0.85);
+  books.castShadow = true;
+  ph.add(books);
+
+  // Dining table — runner + 3-vase centerpiece
+  const runner = new THREE.Mesh(
+    new THREE.BoxGeometry(1.4, 0.005, 0.25),
+    new THREE.MeshStandardMaterial({ color: 0xebe0c5, roughness: 0.9 })
+  );
+  runner.position.set(-0.5, 0.81, 0);
+  ph.add(runner);
+  for (let i = 0; i < 3; i++) {
+    const v = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.04 - i * 0.005, 0.035, 0.15 - i * 0.02, 10),
+      i === 1 ? potMat : stoneMat
+    );
+    v.position.set(-0.9 + i * 0.4, 0.89 - i * 0.01, 0);
+    v.castShadow = true;
+    ph.add(v);
+  }
+
+  // Master bedroom: 2 pillows + throw at foot
+  for (let i = 0; i < 2; i++) {
+    const pillow = new THREE.Mesh(
+      new THREE.BoxGeometry(0.55, 0.1, 0.34),
+      new THREE.MeshStandardMaterial({ color: 0xf2ead8, roughness: 0.85 })
+    );
+    pillow.position.set(2.2 + i * 0.7, 0.5, -3.1);
+    pillow.castShadow = true;
+    ph.add(pillow);
+  }
+  const throwBlanket = new THREE.Mesh(
+    new THREE.BoxGeometry(2.0, 0.06, 0.45),
+    new THREE.MeshStandardMaterial({ color: 0x7a6852, roughness: 0.85 })
+  );
+  throwBlanket.position.set(2.6, 0.48, -1.7);
+  throwBlanket.castShadow = true;
+  ph.add(throwBlanket);
+
+  // Indoor plants — large fiddle-leaf in living, small herb pot in kitchen, palm in master
+  function indoorPlant(px, pz, scale) {
+    const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.18 * scale, 0.14 * scale, 0.25 * scale, 12), potMat);
+    pot.position.set(px, 0.18 * scale, pz);
+    pot.castShadow = true;
+    ph.add(pot);
+    for (let i = 0; i < 5; i++) {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.16 * scale, 8, 6), foliageMatI);
+      leaf.position.set(
+        px + (Math.random() - 0.5) * 0.18 * scale,
+        (0.4 + Math.random() * 0.5) * scale,
+        pz + (Math.random() - 0.5) * 0.18 * scale
+      );
+      leaf.scale.set(1, 1.3, 1);
+      leaf.castShadow = true;
+      ph.add(leaf);
+    }
+  }
+  indoorPlant(-4.2, -2.6, 1.2);   // Living room corner — fiddle leaf
+  indoorPlant(-4.2, 2.8, 0.9);    // Kitchen counter end — herb pot
+  indoorPlant(4.2, -3.0, 1.0);    // Master bedroom — palm
+
+  // Subtle ceiling-light plates (warm circles to suggest fixtures from above)
+  const ceilingFixtureMat = new THREE.MeshStandardMaterial({
+    color: 0xfff5dc, emissive: 0xfff0d4, emissiveIntensity: 0.8, roughness: 0.7
+  });
+  [[-2.6, -1.6], [-2.5, 1.8], [2.6, -2.5]].forEach(([px, pz]) => {
+    const f = new THREE.Mesh(new THREE.CircleGeometry(0.2, 16), ceilingFixtureMat);
+    f.rotation.x = Math.PI / 2;
+    f.position.set(px, 0.95, pz);
+    ph.add(f);
+  });
 
   // ---- Click hotspots: invisible plates over each room ----
   const ROOMS = [
@@ -2403,26 +2817,27 @@ function initFloorScene() {
 
   // ---- Sun system ----
   // Times: morning(7) — east-low; noon(13) — high overhead-south; evening(19) — west-low warm; night(23) — moon cool
+  // Intensities calibrated for ACESFilmic + physicallyCorrectLights (higher absolute values).
   const sunPresets = {
     morning: {
-      pos: [-12, 6, 4], color: 0xffd9a0, intensity: 1.0,
-      ambient: 0.5, hemi: 0.4, hemiSky: 0xffe8c4, hemiGround: 0x8a7a66,
-      bg: 0xf6f0e1, fog: 0xf6f0e1
+      pos: [-12, 6, 4], color: 0xffd9a0, intensity: 2.4,
+      ambient: 0.32, hemi: 0.32, hemiSky: 0xffe8c4, hemiGround: 0x8a7a66,
+      bg: 0xf6f0e1, fog: 0xf6f0e1, expose: 1.05
     },
     noon: {
-      pos: [3, 14, 5], color: 0xfff0d4, intensity: 1.3,
-      ambient: 0.55, hemi: 0.5, hemiSky: 0xfff5e1, hemiGround: 0x8a7a66,
-      bg: 0xf6f2ea, fog: 0xefe8da
+      pos: [3, 14, 5], color: 0xfff0d4, intensity: 3.1,
+      ambient: 0.32, hemi: 0.4, hemiSky: 0xfff5e1, hemiGround: 0x8a7a66,
+      bg: 0xf6f2ea, fog: 0xefe8da, expose: 1.0
     },
     evening: {
-      pos: [13, 5, -3], color: 0xff9b5e, intensity: 1.4,
-      ambient: 0.4, hemi: 0.35, hemiSky: 0xffb88a, hemiGround: 0x6a4838,
-      bg: 0xf2dfc3, fog: 0xeac9a3
+      pos: [13, 5, -3], color: 0xff9b5e, intensity: 3.4,
+      ambient: 0.28, hemi: 0.3, hemiSky: 0xffb88a, hemiGround: 0x6a4838,
+      bg: 0xf2dfc3, fog: 0xeac9a3, expose: 1.1
     },
     night: {
-      pos: [-6, 9, -4], color: 0x6788a8, intensity: 0.5,
-      ambient: 0.18, hemi: 0.18, hemiSky: 0x2c3a52, hemiGround: 0x1a1a22,
-      bg: 0x1f2230, fog: 0x1a1d28
+      pos: [-6, 9, -4], color: 0x6788a8, intensity: 0.9,
+      ambient: 0.12, hemi: 0.15, hemiSky: 0x2c3a52, hemiGround: 0x1a1a22,
+      bg: 0x1f2230, fog: 0x1a1d28, expose: 0.85
     }
   };
 
@@ -2441,6 +2856,7 @@ function initFloorScene() {
       hemi.color.setHex(p.hemiSky);
       hemi.groundColor.setHex(p.hemiGround);
       scene.fog.color.setHex(p.fog);
+      if (p.expose) renderer.toneMappingExposure = p.expose;
       // Update wrap background
       gsap.to(wrap, { backgroundColor: '#' + p.bg.toString(16).padStart(6, '0'), duration: 0.01 });
       return;
@@ -2456,6 +2872,7 @@ function initFloorScene() {
     gsap.to(sun, { intensity: p.intensity, duration: 1.6, ease: 'expo.inOut' });
     gsap.to(ambient, { intensity: p.ambient, duration: 1.6, ease: 'expo.inOut' });
     gsap.to(hemi, { intensity: p.hemi, duration: 1.6, ease: 'expo.inOut' });
+    if (p.expose) gsap.to(renderer, { toneMappingExposure: p.expose, duration: 1.6, ease: 'expo.inOut' });
     gsap.to(hemi.color, {
       r: ((p.hemiSky >> 16) & 255) / 255, g: ((p.hemiSky >> 8) & 255) / 255, b: (p.hemiSky & 255) / 255,
       duration: 1.6, ease: 'expo.inOut'
@@ -2534,13 +2951,27 @@ function initFloorScene() {
     }
   });
 
-  // ---- Animation: gentle orbit ----
+  // ---- Animation: gentle orbit + cinematic intro ----
   let baseAngle = Math.PI / 4;
   let lastInteract = performance.now();
   let inView = true;
+  let camRig = { radius: 22, height: 18, lookY: 0.6 };  // wide intro shot
   ScrollTrigger.create({
     trigger: wrap, start: 'top bottom', end: 'bottom top',
     onToggle: ({ isActive }) => { inView = isActive; }
+  });
+
+  // Cinematic intro: pull from wide-overhead down to comfortable orbit when section enters
+  ScrollTrigger.create({
+    trigger: '.floor',
+    start: 'top 75%',
+    once: true,
+    onEnter: () => {
+      gsap.to(camRig, {
+        radius: 14, height: 11,
+        duration: 2.6, ease: 'expo.out'
+      });
+    }
   });
 
   function onResize() {
@@ -2554,11 +2985,10 @@ function initFloorScene() {
     requestAnimationFrame(animate);
     const t = performance.now() * 0.00012;
     if (inView) baseAngle += 0.0009;
-    const radius = 14;
-    camera.position.x = Math.sin(baseAngle) * radius;
-    camera.position.z = Math.cos(baseAngle) * radius;
-    camera.position.y = 11 + Math.sin(t * 2) * 0.2;
-    camera.lookAt(0, 0.6, 0);
+    camera.position.x = Math.sin(baseAngle) * camRig.radius;
+    camera.position.z = Math.cos(baseAngle) * camRig.radius;
+    camera.position.y = camRig.height + Math.sin(t * 2) * 0.2;
+    camera.lookAt(0, camRig.lookY, 0);
     renderer.render(scene, camera);
   }
   onResize();
